@@ -1,22 +1,44 @@
 # Pani Gosia
 
-Wieczorny rytual emocjonalny - aplikacja PWA dla rodzin.
+Wieczorny rytual emocjonalny — aplikacja PWA dla rodzin.
 
 ## Opis
 
-Pani Gosia to aplikacja pomagajaca rodzicom i dzieciom w codziennym rozpoznawaniu i nazywaniu swoich stanow emocjonalnych. Wieczorny rytual polega na wybraniu emocji z kola emocji, a aplikacja pokazuje podsumowanie tygodnia w formie wykresu kolowego.
+Pani Gosia pomaga rodzicom i dzieciom w codziennym rozpoznawaniu i nazywaniu swoich stanow emocjonalnych. Wieczorny rytual polega na wybraniu emocji z kola emocji. Aplikacja zapisuje wybory i pokazuje podsumowanie tygodnia w formie wykresu kolowego.
 
-## Prototyp
+## Funkcje
 
-Plik `prototype/index.html` zawiera interaktywny prototyp mobilny z:
-- Kolem emocji (6 podstawowych stanow + mozliwosc dodawania wlasnych)
-- Wykresem kolowym podsumowania tygodnia
-- Zapisem danych w localStorage
+- Kolo emocji z 6 podstawowymi stanami (radosc, spokoj, zlosc, smutek, strach, ciekawosc)
+- Mozliwosc dodawania wlasnych stanow emocjonalnych
+- Wykres kolowy podsumowania ostatnich 7 dni
+- 2 profile: dziecko i rodzic (planowane)
+- Responsywny layout — 100% szerokosci ekranu na telefonie, tablecie i desktopie
+- Dane zapisywane lokalnie (brak backendu)
 
-Aby uruchomic prototyp, otworz `prototype/index.html` w przegladarce.
+## Uruchomienie
+
+Otworz `index.html` w przegladarce. Nie wymaga serwera ani build stepu.
+
+## Screenshoty
+
+| Ekran | Podglad |
+|-------|---------|
+| Kolo emocji | ![Emotion wheel](docs/screenshots/emotion-wheel.png) |
+| Wykres kolowy | ![Pie chart](docs/screenshots/pie-chart.png) |
+| Dodawanie stanu | ![Add custom](docs/screenshots/add-custom.png) |
+
+## Live
+
+**https://rafalsladek.github.io/PaniGosia/**
+
+Kazdy push na `main` automatycznie deployuje nowa wersje.
 
 ## Technologia (planowana)
 
 - SvelteKit + IndexedDB
 - PWA offline-first
-- Brak backendu - dane lokalne
+- Brak backendu — dane lokalne
+
+## Spec
+
+Szczegolowy design: [docs/superpowers/specs/2026-04-04-pani-gosia-design.md](docs/superpowers/specs/2026-04-04-pani-gosia-design.md)
