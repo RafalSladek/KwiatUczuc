@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pani Gosia - Mobile</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #1a1a2e 100%);
+    min-height: 100vh;
+    color: #e0e0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .bg-orb {
+    position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.3; z-index: 0;
+    animation: float 20s ease-in-out infinite;
+  }
+  .bg-orb:nth-child(1) { width: 400px; height: 400px; background: #e040fb; top: -100px; left: -100px; }
+  .bg-orb:nth-child(2) { width: 300px; height: 300px; background: #536dfe; bottom: -50px; right: -50px; animation-delay: -5s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -30px) scale(1.05); }
+    66% { transform: translate(-20px, 20px) scale(0.95); }
+  }
+
+  .phone {
+    position: relative; z-index: 1;
+    width: 375px; height: 700px;
+    background: linear-gradient(180deg, #0d1527 0%, #131b33 50%, #0d1527 100%);
+    border-radius: 40px;
+    border: 3px solid rgba(255,255,255,0.08);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04);
+    overflow: hidden;
+  }
+
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 150px; height: 28px;
+    background: #0a0f1e;
+    border-radius: 0 0 20px 20px;
+    z-index: 100;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    padding: 48px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .screen.hidden {
+    opacity: 0;
+    transform: translateX(100%);
+    pointer-events: none;
+  }
+
+  .screen.hidden-left {
+    opacity: 0;
+    transform: translateX(-100%);
+    pointer-events: none;
+  }
+
+  .app-header { text-align: center; margin-bottom: 8px; }
+
+  .app-title {
+    font-size: 1.4rem; font-weight: 300; letter-spacing: 0.08em;
+    background: linear-gradient(135deg, #e040fb, #536dfe, #00bfa5);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .app-subtitle { font-size: 0.7rem; color: #6666aa; margin-top: 2px; }
+
+  .screen-question {
+    text-align: center; color: #9999bb; font-size: 0.9rem; margin: 16px 0 12px;
+  }
+
+  .emotion-circle {
+    position: relative;
+    width: 280px; height: 280px;
+    margin: 0 auto;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .emotion-circle::before {
+    content: '';
+    position: absolute; inset: 30px; border-radius: 50%;
+    border: 1px dashed rgba(255,255,255,0.03);
+  }
+
+  .emo {
+    position: absolute;
+    padding: 8px 18px;
+    border-radius: 22px;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: 1.5px solid transparent;
+    font-weight: 400;
+    user-select: none;
+  }
+
+  .emo:hover { transform: scale(1.08); }
+
+  .emo.selected {
+    border-color: rgba(255,255,255,0.5);
+    box-shadow: 0 0 18px rgba(255,255,255,0.12);
+    transform: scale(1.05);
+  }
+
+  .emo-radosc { background: rgba(239,83,80,0.3); color: #ef5350; top: 8px; left: 50%; transform: translateX(-50%); }
+  .emo-radosc.selected { transform: translateX(-50%) scale(1.05); }
+  .emo-spokoj { background: rgba(66,165,245,0.3); color: #42a5f5; top: 58px; right: 4px; }
+  .emo-zlosc { background: rgba(255,167,38,0.3); color: #ffa726; bottom: 58px; right: 4px; }
+  .emo-smutek { background: rgba(126,87,194,0.3); color: #7e57c2; bottom: 8px; left: 50%; transform: translateX(-50%); }
+  .emo-smutek.selected { transform: translateX(-50%) scale(1.05); }
+  .emo-strach { background: rgba(171,71,188,0.3); color: #ab47bc; top: 58px; left: 4px; }
+  .emo-ciekawosc { background: rgba(102,187,106,0.3); color: #66bb6a; bottom: 58px; left: 4px; }
+
+  .add-btn {
+    text-align: center; margin-top: 12px;
+    font-size: 0.82rem; color: #7c4dff; cursor: pointer; padding: 6px;
+  }
+  .add-btn:hover { color: #b388ff; }
+
+  .pie-svg {
+    width: 260px; height: 260px;
+    margin: 20px auto 0; display: block;
+    filter: drop-shadow(0 4px 20px rgba(0,0,0,0.3));
+  }
+
+  .pie-svg text {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-weight: 500; text-anchor: middle; dominant-baseline: central;
+  }
+
+  .pie-period { text-align: center; margin-top: 8px; font-size: 0.65rem; color: #666688; }
+
+  .back-btn {
+    margin: auto auto 20px;
+    background: rgba(255,255,255,0.08);
+    color: #9999bb;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 12px 40px; border-radius: 28px;
+    font-size: 0.85rem; cursor: pointer;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.12); color: #d0d0f0; }
+
+  .modal-overlay {
+    position: absolute; inset: 0;
+    background: rgba(10,15,30,0.85);
+    backdrop-filter: blur(10px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 50;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: rgba(30,40,70,0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 28px 24px; width: 280px; text-align: center;
+  }
+
+  .modal h3 { font-size: 1rem; font-weight: 400; color: #d0d0f0; margin-bottom: 16px; }
+
+  .modal input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 12px 16px; color: #e0e0f0; font-size: 0.9rem;
+    outline: none; font-family: inherit; margin-bottom: 16px;
+  }
+
+  .modal input:focus { border-color: #7c4dff; }
+
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-actions button {
+    flex: 1; padding: 10px; border-radius: 16px; border: none;
+    font-size: 0.85rem; cursor: pointer; font-family: inherit;
+  }
+  .modal-cancel { background: rgba(255,255,255,0.06); color: #9999bb; }
+  .modal-save { background: linear-gradient(135deg, #7c4dff, #536dfe); color: white; }
+</style>
+</head>
+<body>
+
+<div class="bg-orb"></div>
+<div class="bg-orb"></div>
+
+<div class="phone">
+
+  <div class="screen" id="screen1">
+    <div class="app-header">
+      <div class="app-title">Pani Gosia</div>
+      <div class="app-subtitle">wieczorny rytual</div>
+    </div>
+    <p class="screen-question">Jak sie dzis czujesz?</p>
+    <div class="emotion-circle" id="emotionCircle">
+      <div class="emo emo-radosc" data-name="radosc" onclick="selectEmo(this)">radosc</div>
+      <div class="emo emo-spokoj" data-name="spokoj" onclick="selectEmo(this)">spokoj</div>
+      <div class="emo emo-zlosc" data-name="zlosc" onclick="selectEmo(this)">zlosc</div>
+      <div class="emo emo-smutek" data-name="smutek" onclick="selectEmo(this)">smutek</div>
+      <div class="emo emo-strach" data-name="strach" onclick="selectEmo(this)">strach</div>
+      <div class="emo emo-ciekawosc" data-name="ciekawosc" onclick="selectEmo(this)">ciekawosc</div>
+    </div>
+    <div class="add-btn" onclick="showModal()">+ dodaj wlasny stan</div>
+  </div>
+
+  <div class="screen hidden" id="screen2">
+    <div class="app-header">
+      <div class="app-title">Pani Gosia</div>
+      <div class="app-subtitle">podsumowanie</div>
+    </div>
+    <p class="screen-question">Twoj tydzien</p>
+    <svg class="pie-svg" id="pieSvg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"></svg>
+    <p class="pie-period">ostatnie 7 dni</p>
+    <button class="back-btn" onclick="goBack()">wstecz</button>
+  </div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h3>Dodaj wlasny stan</h3>
+      <input type="text" id="customInput" placeholder="np. zmeczenie, ekscytacja..." maxlength="20"
+             onkeydown="if(event.key==='Enter')addCustom()">
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="hideModal()">Anuluj</button>
+        <button class="modal-save" onclick="addCustom()">Dodaj</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var customEmotions = JSON.parse(localStorage.getItem('panigosia_custom') || '[]');
+  var entries = JSON.parse(localStorage.getItem('panigosia_entries') || '[]');
+
+  var colorMap = {
+    'radosc': { bg: 'rgba(239,83,80,0.3)', color: '#ef5350' },
+    'spokoj': { bg: 'rgba(66,165,245,0.3)', color: '#42a5f5' },
+    'zlosc': { bg: 'rgba(255,167,38,0.3)', color: '#ffa726' },
+    'smutek': { bg: 'rgba(126,87,194,0.3)', color: '#7e57c2' },
+    'strach': { bg: 'rgba(171,71,188,0.3)', color: '#ab47bc' },
+    'ciekawosc': { bg: 'rgba(102,187,106,0.3)', color: '#66bb6a' }
+  };
+
+  var customColors = [
+    { bg: 'rgba(255,213,79,0.3)', color: '#ffd54f' },
+    { bg: 'rgba(77,208,225,0.3)', color: '#4dd0e1' },
+    { bg: 'rgba(255,138,101,0.3)', color: '#ff8a65' },
+    { bg: 'rgba(174,213,129,0.3)', color: '#aed581' }
+  ];
+
+  function renderCustom() {
+    var existing = document.querySelectorAll('.custom-emo');
+    for (var i = 0; i < existing.length; i++) existing[i].remove();
+    var circle = document.getElementById('emotionCircle');
+    var positions = [
+      { bottom: '130px', right: '-8px' },
+      { bottom: '130px', left: '-8px' },
+      { top: '130px', right: '-8px' },
+      { top: '130px', left: '-8px' }
+    ];
+    for (var i = 0; i < customEmotions.length; i++) {
+      var name = customEmotions[i];
+      var el = document.createElement('div');
+      el.className = 'emo custom-emo';
+      el.dataset.name = name;
+      el.textContent = name;
+      el.onclick = (function(e) { return function() { selectEmo(e); }; })(el);
+      var ci = i % customColors.length;
+      el.style.background = customColors[ci].bg;
+      el.style.color = customColors[ci].color;
+      colorMap[name] = customColors[ci];
+      el.style.position = 'absolute';
+      var pos = positions[i % positions.length];
+      var keys = Object.keys(pos);
+      for (var k = 0; k < keys.length; k++) el.style[keys[k]] = pos[keys[k]];
+      circle.appendChild(el);
+    }
+  }
+
+  function selectEmo(el) {
+    el.classList.add('selected');
+    var name = el.dataset.name;
+    var entry = { date: new Date().toISOString().split('T')[0], emotions: [name] };
+    entries.push(entry);
+    localStorage.setItem('panigosia_entries', JSON.stringify(entries));
+    setTimeout(function() {
+      renderPie();
+      document.getElementById('screen1').classList.add('hidden-left');
+      document.getElementById('screen2').classList.remove('hidden');
+    }, 300);
+  }
+
+  function goBack() {
+    document.querySelectorAll('.emo.selected').forEach(function(el) { el.classList.remove('selected'); });
+    document.getElementById('screen2').classList.add('hidden');
+    document.getElementById('screen1').classList.remove('hidden-left');
+  }
+
+  function showModal() {
+    document.getElementById('modal').classList.add('active');
+    setTimeout(function() { document.getElementById('customInput').focus(); }, 100);
+  }
+
+  function hideModal() {
+    document.getElementById('modal').classList.remove('active');
+    document.getElementById('customInput').value = '';
+  }
+
+  function addCustom() {
+    var input = document.getElementById('customInput');
+    var name = input.value.trim().toLowerCase();
+    if (!name || colorMap[name] || customEmotions.indexOf(name) !== -1) { hideModal(); return; }
+    customEmotions.push(name);
+    localStorage.setItem('panigosia_custom', JSON.stringify(customEmotions));
+    hideModal();
+    renderCustom();
+  }
+
+  function renderPie() {
+    var svg = document.getElementById('pieSvg');
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    var recent = entries.slice(-7);
+    var counts = {};
+    var total = 0;
+    for (var i = 0; i < recent.length; i++) {
+      var emos = recent[i].emotions;
+      for (var j = 0; j < emos.length; j++) {
+        var n = emos[j];
+        counts[n] = (counts[n] || 0) + 1;
+        total++;
+      }
+    }
+    if (total === 0) return;
+
+    var sorted = Object.keys(counts).map(function(k) { return [k, counts[k]]; });
+    sorted.sort(function(a, b) { return b[1] - a[1]; });
+
+    var cx = 150, cy = 150, r = 125;
+    var ns = 'http://www.w3.org/2000/svg';
+    var startAngle = -90;
+
+    for (var i = 0; i < sorted.length; i++) {
+      var name = sorted[i][0];
+      var count = sorted[i][1];
+      var sweep = (count / total) * 360;
+      var endAngle = startAngle + sweep;
+      var startRad = (startAngle * Math.PI) / 180;
+      var endRad = (endAngle * Math.PI) / 180;
+      var x1 = cx + r * Math.cos(startRad);
+      var y1 = cy + r * Math.sin(startRad);
+      var x2 = cx + r * Math.cos(endRad);
+      var y2 = cy + r * Math.sin(endRad);
+      var largeArc = sweep > 180 ? 1 : 0;
+      var c = colorMap[name] || { bg: 'rgba(200,200,200,0.3)', color: '#ccc' };
+
+      var path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', 'M' + cx + ',' + cy + ' L' + x1 + ',' + y1 + ' A' + r + ',' + r + ' 0 ' + largeArc + ',1 ' + x2 + ',' + y2 + ' Z');
+      path.setAttribute('fill', c.bg);
+      svg.appendChild(path);
+
+      var line = document.createElementNS(ns, 'line');
+      line.setAttribute('x1', cx);
+      line.setAttribute('y1', cy);
+      line.setAttribute('x2', x1);
+      line.setAttribute('y2', y1);
+      line.setAttribute('stroke', 'rgba(255,255,255,0.08)');
+      line.setAttribute('stroke-width', '0.5');
+      svg.appendChild(line);
+
+      var midRad = ((startAngle + sweep / 2) * Math.PI) / 180;
+      var lr = r * 0.6;
+      var lx = cx + lr * Math.cos(midRad);
+      var ly = cy + lr * Math.sin(midRad);
+
+      var text = document.createElementNS(ns, 'text');
+      text.setAttribute('x', lx);
+      text.setAttribute('y', ly);
+      text.setAttribute('font-size', sweep > 30 ? '12' : '9');
+      text.setAttribute('fill', c.color);
+      text.textContent = name;
+      svg.appendChild(text);
+
+      startAngle = endAngle;
+    }
+  }
+
+  renderCustom();
+</script>
+
+</body>
+</html>
