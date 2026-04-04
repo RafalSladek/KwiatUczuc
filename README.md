@@ -23,15 +23,20 @@ kONtakt pomaga rodzicom i dzieciom w codziennym rozpoznawaniu i nazywaniu swoich
 
 ## Screenshoty
 
-| Widok | Ciemny | Pastelowy |
-|-------|--------|-----------|
-| Kolo emocji | ![Dark circle](docs/screenshots/mobile-dark-circle.png) | ![Pastel circle](docs/screenshots/mobile-pastel-circle.png) |
-| Kwiat emocji | ![Dark flower](docs/screenshots/mobile-dark-flower.png) | ![Pastel flower](docs/screenshots/mobile-pastel-flower.png) |
+### iPhone SE
 
-| Desktop |
-|---------|
-| ![Desktop dark](docs/screenshots/desktop-dark-circle.png) |
-| ![Desktop flower](docs/screenshots/desktop-dark-flower.png) |
+| Widok | Pastelowy | Ciemny |
+|-------|-----------|--------|
+| Kolo emocji | ![Pastel circle](docs/screenshots/iphonese-pastel-circle.png) | ![Dark circle](docs/screenshots/iphonese-dark-circle.png) |
+| Kwiat emocji | ![Pastel flower](docs/screenshots/iphonese-pastel-flower.png) | ![Dark flower](docs/screenshots/iphonese-dark-flower.png) |
+| Wykres | ![Pastel pie](docs/screenshots/iphonese-pastel-pie.png) | ![Dark pie](docs/screenshots/iphonese-dark-pie.png) |
+
+### Desktop
+
+| Pastelowy | Ciemny |
+|-----------|--------|
+| ![Desktop pastel](docs/screenshots/desktop-pastel-circle.png) | ![Desktop dark](docs/screenshots/desktop-dark-circle.png) |
+| ![Desktop pastel flower](docs/screenshots/desktop-pastel-flower.png) | ![Desktop dark flower](docs/screenshots/desktop-dark-flower.png) |
 
 ## Live
 
