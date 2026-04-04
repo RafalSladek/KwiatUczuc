@@ -615,10 +615,19 @@
 
   function confirmSelection() {
     if (selectedNames.length === 0) return;
-    var entry = { date: today(), emotions: selectedNames.slice() };
-    entries.push(entry);
+    // Update existing today entry or create new one
+    var t = today();
+    var found = false;
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].date === t) {
+        entries[i].emotions = selectedNames.slice();
+        found = true;
+        break;
+      }
+    }
+    if (!found) entries.push({ date: t, emotions: selectedNames.slice() });
     localStorage.setItem('panigosia_entries', JSON.stringify(entries));
-    localStorage.setItem('panigosia_last_vote', today());
+    localStorage.setItem('panigosia_last_vote', t);
     currentPeriod = 'today';
     updatePeriodButtons();
     renderPie(true);
@@ -628,9 +637,7 @@
   }
 
   function goBack() {
-    selectedNames = [];
-    document.querySelectorAll('.emo.selected').forEach(function(el) { el.classList.remove('selected'); });
-    document.getElementById('confirmBtn').classList.add('hidden');
+    // Keep selected emotions so user can edit today's entry
     document.getElementById('screen2').classList.add('hidden');
     document.getElementById('screen1').classList.remove('hidden-left');
     document.querySelector('.add-btn').style.display = '';
@@ -899,13 +906,21 @@
 
   renderWheel();
 
+  // Restore today's emotions on the wheel if already voted today
   if (localStorage.getItem('panigosia_last_vote') === today()) {
-    currentPeriod = 'today';
-    updatePeriodButtons();
-    renderPie(false);
-    document.getElementById('screen1').classList.add('hidden-left');
-    document.getElementById('screen2').classList.remove('hidden');
-    document.querySelector('.add-btn').style.display = 'none';
+    var todayEntry = null;
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i].date === today()) { todayEntry = entries[i]; break; }
+    }
+    if (todayEntry && todayEntry.emotions.length > 0) {
+      selectedNames = todayEntry.emotions.slice();
+      document.querySelectorAll('.emo').forEach(function(el) {
+        if (selectedNames.indexOf(el.dataset.name) !== -1) {
+          el.classList.add('selected');
+        }
+      });
+      document.getElementById('confirmBtn').classList.remove('hidden');
+    }
   }
 </script>
 
