@@ -263,6 +263,25 @@
   .modal-cancel { background: rgba(149,117,205,0.12); color: #b39ddb; }
   .modal-save { background: linear-gradient(135deg, rgba(239,83,80,0.6), rgba(186,104,200,0.6)); color: #fff; }
 
+  .autocomplete-list {
+    list-style: none; margin: 0 0 12px; padding: 0;
+    max-height: 150px; overflow-y: auto; border-radius: 12px;
+    background: rgba(15,52,96,0.95);
+    border: 1px solid rgba(149,117,205,0.2);
+    display: none;
+  }
+  .autocomplete-list.visible { display: block; }
+  .autocomplete-list li {
+    padding: 8px 16px; font-size: 0.85rem; color: #d1c4e9; cursor: pointer;
+    border-bottom: 1px solid rgba(149,117,205,0.08);
+    transition: background 0.15s;
+  }
+  .autocomplete-list li:last-child { border-bottom: none; }
+  .autocomplete-list li:hover, .autocomplete-list li.active {
+    background: rgba(186,104,200,0.2);
+  }
+  .autocomplete-list li .match { color: #e040fb; font-weight: 600; }
+
   .theme-toggle {
     position: fixed; top: 16px; right: 16px; z-index: 60;
     background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
@@ -316,6 +335,15 @@
   body.pastel .modal input:focus { border-color: rgba(161,48,96,0.4); }
   body.pastel .modal-cancel { background: rgba(195,177,225,0.15); color: #6a3080; }
   body.pastel .modal-save { background: linear-gradient(135deg, rgba(248,180,200,0.8), rgba(195,177,225,0.8)); color: #4a3070; }
+  body.pastel .autocomplete-list {
+    background: rgba(255,255,255,0.97);
+    border-color: rgba(195,177,225,0.3);
+  }
+  body.pastel .autocomplete-list li { color: #3d3d5c; border-bottom-color: rgba(195,177,225,0.15); }
+  body.pastel .autocomplete-list li:hover, body.pastel .autocomplete-list li.active {
+    background: rgba(195,177,225,0.2);
+  }
+  body.pastel .autocomplete-list li .match { color: #6a3080; }
   body.pastel .pie-svg { filter: drop-shadow(0 4px 20px rgba(0,0,0,0.08)); }
 </style>
 </head>
@@ -358,7 +386,8 @@
     <div class="modal">
       <h3>Dodaj własny stan</h3>
       <input type="text" id="customInput" placeholder="np. zmęczenie, ekscytacja..." maxlength="20"
-             onkeydown="if(event.key==='Enter')addCustom()">
+             autocomplete="off">
+      <ul class="autocomplete-list" id="autocompleteList"></ul>
       <div class="modal-actions">
         <button class="modal-cancel" onclick="hideModal()">Anuluj</button>
         <button class="modal-save" onclick="addCustom()">Dodaj</button>
@@ -674,7 +703,159 @@
   function hideModal() {
     document.getElementById('modal').classList.remove('active');
     document.getElementById('customInput').value = '';
+    document.getElementById('autocompleteList').classList.remove('visible');
+    acIndex = -1;
   }
+
+  // Feelings dictionary — Feelings Wheel (Dr. Gloria Willcox) + rozszerzenia
+  var feelingsDict = [
+    // === RADOŚĆ (Happy) ===
+    'szczęście','radość','euforia','zachwyt','entuzjazm','ekscytacja',
+    'optymizm','nadzieja','wdzięczność','duma','pewność siebie',
+    'spokój','harmonia','zadowolenie','satysfakcja','ulga',
+    'miłość','czułość','bliskość','przyjemność','rozkosz',
+    'ciekawość','zainteresowanie','fascynacja','inspiracja',
+    'energia','wigór','siła','odwaga','determinacja',
+    'swoboda','wolność','lekkość','beztroskość',
+    'humor','rozbawienie','wesołość',
+    // === SMUTEK (Sad) ===
+    'smutek','żal','tęsknota','nostalgia','melancholia',
+    'samotność','osamotnienie','izolacja','pustka',
+    'rozczarowanie','zawód','rezygnacja','bezsilność',
+    'poczucie winy','wstyd','skrucha','wyrzuty sumienia',
+    'przygnębienie','depresyjność','apatia','zniechęcenie',
+    'bezradność','beznadziejność','rozpacz',
+    'ból','cierpienie','żałoba','strata',
+    // === ZŁOŚĆ (Angry) ===
+    'złość','gniew','wściekłość','furia','irytacja',
+    'frustracja','zniecierpliwienie','rozdrażnienie',
+    'uraza','niechęć','pogarda','odraza',
+    'zazdrość','zawiść','rywalizacja',
+    'bunt','sprzeciw','opór','upór',
+    'agresja','wrogość','nienawiść',
+    // === STRACH (Fearful) ===
+    'strach','lęk','niepokój','obawa','trwoga',
+    'panika','przerażenie','groza','horror',
+    'nerwowość','napięcie','stres','presja',
+    'niepewność','wahanie','zagubienie',
+    'bezpieczeństwo','zagrożenie','wrażliwość',
+    'nieśmiałość','skrępowanie','tremor',
+    // === WSTRĘT (Disgusted) ===
+    'wstręt','obrzydzenie','niesmak','zniesmaczenie',
+    'rozczarowanie','dezaprobata','potępienie',
+    'znudzenie','nuda','monotonia',
+    // === DYSKOMFORT (Bad) ===
+    'dyskomfort','zmęczenie','wyczerpanie','senność',
+    'przytłoczenie','przeciążenie','wypalenie',
+    'napięcie','sztywność','dysharmonia',
+    'zakłopotanie','zażenowanie','niezręczność',
+    'niedowartościowanie','poczucie odrzucenia','alienacja',
+    'tępy ból','otępienie','odrętwienie',
+    // === ZASKOCZENIE (Surprised) ===
+    'zaskoczenie','zdumienie','szok','niedowierzanie',
+    'oszołomienie','konsternacja','zakłopotanie',
+    'podziw','zachwyt','olśnienie',
+    'ciekawość','intrygacja','tajemniczość',
+    // === POTRZEBY / dodatkowe stany ===
+    'spokój wewnętrzny','wewnętrzna siła','akceptacja',
+    'empatia','współczucie','troska','opiekuńczość',
+    'wdzięczność','uznanie','szacunek',
+    'motywacja','zapał','pasja','flow',
+    'komfort','bezpieczeństwo','stabilność',
+    'kreatywność','twórczość','wyobraźnia',
+    'skupienie','uważność','obecność','mindfulness',
+    'wolność','niezależność','autonomia',
+    'przynależność','więź','wspólnota','lojalność',
+    'autentyczność','spójność','integralność',
+    'poczucie sensu','cel','misja',
+    'równowaga','centrowanie','grounding'
+  ];
+  // Deduplicate
+  feelingsDict = feelingsDict.filter(function(v, i, a) { return a.indexOf(v) === i; });
+
+  var acIndex = -1;
+
+  (function() {
+    var input = document.getElementById('customInput');
+    var list = document.getElementById('autocompleteList');
+
+    input.addEventListener('input', function() {
+      var val = input.value.trim().toLowerCase();
+      acIndex = -1;
+      if (val.length < 1) { list.classList.remove('visible'); return; }
+
+      // Filter: exclude already-used emotions
+      var usedNames = Object.keys(colorMap);
+      var matches = feelingsDict.filter(function(f) {
+        return f.indexOf(val) !== -1 && usedNames.indexOf(f) === -1;
+      });
+      // Sort: starts-with first, then contains
+      matches.sort(function(a, b) {
+        var aStarts = a.indexOf(val) === 0 ? 0 : 1;
+        var bStarts = b.indexOf(val) === 0 ? 0 : 1;
+        return aStarts - bStarts || a.length - b.length;
+      });
+      matches = matches.slice(0, 8);
+
+      if (matches.length === 0) { list.classList.remove('visible'); return; }
+
+      list.innerHTML = '';
+      matches.forEach(function(m) {
+        var li = document.createElement('li');
+        // Highlight matching part
+        var idx = m.indexOf(val);
+        li.innerHTML = m.substring(0, idx) +
+          '<span class="match">' + m.substring(idx, idx + val.length) + '</span>' +
+          m.substring(idx + val.length);
+        li.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          input.value = m;
+          list.classList.remove('visible');
+          acIndex = -1;
+        });
+        list.appendChild(li);
+      });
+      list.classList.add('visible');
+    });
+
+    input.addEventListener('keydown', function(e) {
+      var items = list.querySelectorAll('li');
+      if (!list.classList.contains('visible') || items.length === 0) {
+        if (e.key === 'Enter') addCustom();
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        acIndex = Math.min(acIndex + 1, items.length - 1);
+        updateAcHighlight(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        acIndex = Math.max(acIndex - 1, -1);
+        updateAcHighlight(items);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (acIndex >= 0 && items[acIndex]) {
+          input.value = items[acIndex].textContent;
+          list.classList.remove('visible');
+          acIndex = -1;
+        } else {
+          addCustom();
+        }
+      } else if (e.key === 'Escape') {
+        list.classList.remove('visible');
+        acIndex = -1;
+      }
+    });
+
+    function updateAcHighlight(items) {
+      for (var i = 0; i < items.length; i++) {
+        items[i].classList.toggle('active', i === acIndex);
+      }
+      if (acIndex >= 0 && items[acIndex]) {
+        items[acIndex].scrollIntoView({ block: 'nearest' });
+      }
+    }
+  })();
 
   function addCustom() {
     var input = document.getElementById('customInput');
