@@ -46,6 +46,7 @@
     display: flex;
     flex-direction: column;
     transition: opacity 0.4s ease, transform 0.4s ease;
+    overflow: hidden;
   }
 
   .screen.hidden {
@@ -124,8 +125,8 @@
   .add-btn:hover { color: #b388ff; }
 
   .pie-svg {
-    width: 80vw; max-width: 400px; height: auto;
-    margin: 20px auto 0; display: block;
+    width: 90vw; max-width: 560px; height: auto;
+    margin: 10px auto 0; display: block; flex: 1;
     filter: drop-shadow(0 4px 20px rgba(0,0,0,0.3));
   }
 
@@ -134,17 +135,15 @@
     font-weight: 500; text-anchor: middle; dominant-baseline: central;
   }
 
-  .pie-period { text-align: center; margin-top: 12px; font-size: 0.85rem; color: #666688; }
-
   .back-btn {
-    margin: auto auto 30px;
-    background: rgba(255,255,255,0.08);
-    color: #9999bb;
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 14px 48px; border-radius: 28px;
-    font-size: 1rem; cursor: pointer;
+    margin: 8px auto 16px;
+    background: rgba(255,255,255,0.06);
+    color: #777799;
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 8px 28px; border-radius: 20px;
+    font-size: 0.8rem; cursor: pointer;
   }
-  .back-btn:hover { background: rgba(255,255,255,0.12); color: #d0d0f0; }
+  .back-btn:hover { background: rgba(255,255,255,0.1); color: #d0d0f0; }
 
   .modal-overlay {
     position: fixed; inset: 0;
@@ -212,10 +211,10 @@
   body.pastel .add-btn:hover { color: #a78bdb; }
   body.pastel .pie-period { color: #9a8fad; }
   body.pastel .back-btn {
-    background: rgba(0,0,0,0.05); color: #7a7a9a;
-    border-color: rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.04); color: #9a8fad;
+    border-color: rgba(0,0,0,0.08);
   }
-  body.pastel .back-btn:hover { background: rgba(0,0,0,0.08); color: #5a5a7a; }
+  body.pastel .back-btn:hover { background: rgba(0,0,0,0.07); color: #5a5a7a; }
   body.pastel .emo.selected {
     border-color: rgba(0,0,0,0.25);
     box-shadow: 0 0 20px rgba(0,0,0,0.08);
@@ -258,11 +257,9 @@
   <div class="screen hidden" id="screen2">
     <div class="app-header">
       <div class="app-title">kONtakt</div>
-      <div class="app-subtitle">podsumowanie</div>
+      <div class="app-subtitle">Włącz się na siebie</div>
     </div>
-    <p class="screen-question">Twój tydzień</p>
     <svg class="pie-svg" id="pieSvg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"></svg>
-    <p class="pie-period">ostatnie 7 dni</p>
     <button class="back-btn" onclick="goBack()">wstecz</button>
   </div>
 
@@ -371,10 +368,13 @@
 
     var count = allEmotions.length;
     var scale = getScaleFactor(count);
-    var baseRadius = Math.min(window.innerWidth * 0.38, 180);
-    var radius = baseRadius * scale;
-    var emoSize = Math.max(56, Math.round(84 * scale));
-    var size = (radius + emoSize / 2 + 8) * 2;
+    var maxW = window.innerWidth - 40;
+    var maxH = window.innerHeight * 0.55;
+    var emoSize = Math.max(52, Math.round(78 * scale));
+    var maxRadius = (Math.min(maxW, maxH) - emoSize) / 2;
+    var baseRadius = Math.min(window.innerWidth * 0.3, 160);
+    var radius = Math.min(baseRadius * scale, maxRadius);
+    var size = (radius + emoSize / 2 + 4) * 2;
     var fontSize = Math.max(0.7, 0.9 * scale);
 
     circle.style.width = size + 'px';
@@ -404,12 +404,17 @@
     });
   }
 
+  function today() {
+    return new Date().toISOString().split('T')[0];
+  }
+
   function selectEmo(el) {
     el.classList.add('selected');
     var name = el.dataset.name;
-    var entry = { date: new Date().toISOString().split('T')[0], emotions: [name] };
+    var entry = { date: today(), emotions: [name] };
     entries.push(entry);
     localStorage.setItem('panigosia_entries', JSON.stringify(entries));
+    localStorage.setItem('panigosia_last_vote', today());
     setTimeout(function() {
       renderPie();
       document.getElementById('screen1').classList.add('hidden-left');
@@ -513,6 +518,12 @@
   }
 
   renderWheel();
+
+  if (localStorage.getItem('panigosia_last_vote') === today()) {
+    renderPie();
+    document.getElementById('screen1').classList.add('hidden-left');
+    document.getElementById('screen2').classList.remove('hidden');
+  }
 </script>
 
 </body>
