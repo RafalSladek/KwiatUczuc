@@ -1,10 +1,12 @@
-# Pani Gosia
+# kONtakt
 
-Wieczorny rytual emocjonalny — aplikacja PWA dla rodzin.
+**Włącz się na siebie**
+
+Emocje, potrzeby, wewnętrzne spełnienie (dobrostan psychiczny).
 
 ## Opis
 
-Pani Gosia pomaga rodzicom i dzieciom w codziennym rozpoznawaniu i nazywaniu swoich stanow emocjonalnych. Wieczorny rytual polega na wybraniu emocji z kola emocji. Aplikacja zapisuje wybory i pokazuje podsumowanie tygodnia w formie wykresu kolowego.
+kONtakt pomaga rodzicom i dzieciom w codziennym rozpoznawaniu i nazywaniu swoich stanow emocjonalnych. Wieczorny rytual polega na wybraniu emocji z kola emocji. Aplikacja zapisuje wybory i pokazuje podsumowanie tygodnia w formie wykresu kolowego.
 
 ## Funkcje
 

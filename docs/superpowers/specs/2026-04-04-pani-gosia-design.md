@@ -1,10 +1,12 @@
-# Pani Gosia — Design Spec
+# kONtakt — Design Spec
 
 ## Overview
 
 Evening emotional ritual app for families (parent + child). Users select their emotional state from a randomized circle, and the app tracks emotions over time, showing a weekly pie chart summary.
 
-**Name:** Pani Gosia
+**Name:** kONtakt
+**Tagline:** Włącz się na siebie
+**Focus:** Emocje, potrzeby, wewnętrzne spełnienie (dobrostan psychiczny)
 **Type:** PWA (offline-first, no backend)
 **Target:** SvelteKit + IndexedDB
 **Users:** Parent-child pairs, guided by a psychologist/consultant
