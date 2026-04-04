@@ -155,6 +155,49 @@
   }
   .add-btn:hover { color: #e1bee7; }
 
+  .confirm-btn {
+    display: block; margin: 12px auto 0; padding: 12px 40px;
+    background: linear-gradient(135deg, rgba(186,104,200,0.5), rgba(100,181,246,0.5));
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 24px;
+    color: #fff; font-size: 1rem; font-weight: 500; font-family: inherit;
+    cursor: pointer; transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .confirm-btn:hover { transform: scale(1.05); }
+  .confirm-btn.hidden { display: none; }
+  body.pastel .confirm-btn {
+    background: linear-gradient(135deg, rgba(195,177,225,0.7), rgba(167,199,249,0.7));
+    border-color: rgba(0,0,0,0.1); color: #4a3070;
+  }
+
+  .period-selector {
+    display: flex; margin: 0 auto 12px; border-radius: 24px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05);
+    max-width: 360px; width: 100%;
+  }
+  .period-btn {
+    flex: 1; padding: 10px 4px; border: none; background: transparent;
+    color: rgba(255,255,255,0.4); font-size: 0.8rem; font-family: inherit;
+    font-weight: 500; cursor: pointer; transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    border-right: 1px solid rgba(255,255,255,0.08);
+  }
+  .period-btn:last-child { border-right: none; }
+  .period-btn.active {
+    background: rgba(255,255,255,0.12); color: #e0e0f0; font-weight: 600;
+  }
+  .period-btn:hover { background: rgba(255,255,255,0.08); }
+  body.pastel .period-selector {
+    border-color: rgba(0,0,0,0.1); background: rgba(0,0,0,0.03);
+  }
+  body.pastel .period-btn {
+    color: rgba(0,0,0,0.3); border-right-color: rgba(0,0,0,0.06);
+  }
+  body.pastel .period-btn.active {
+    background: rgba(0,0,0,0.06); color: #3d3d5c;
+  }
+  body.pastel .period-btn:hover { background: rgba(0,0,0,0.04); }
+
   .pie-svg {
     width: 90vw; max-width: 560px; height: auto;
     margin: 10px auto 0; display: block; flex: 1;
@@ -288,12 +331,19 @@
     <div class="emotion-circle" id="emotionCircle"></div>
     <div class="layout-toggle" id="layoutToggle" onclick="toggleLayout()"></div>
     <div class="add-btn" onclick="showModal()">+ dodaj własny stan</div>
+    <button class="confirm-btn hidden" id="confirmBtn" onclick="confirmSelection()">Gotowe</button>
   </div>
 
   <div class="screen hidden" id="screen2">
     <div class="app-header">
       <div class="app-title">kONtakt</div>
       <div class="app-subtitle">Włącz się na siebie</div>
+    </div>
+    <div class="period-selector" id="periodSelector">
+      <button class="period-btn active" data-period="today" onclick="setPeriod('today')">dziś</button>
+      <button class="period-btn" data-period="week" onclick="setPeriod('week')">tydzień</button>
+      <button class="period-btn" data-period="2weeks" onclick="setPeriod('2weeks')">2 tyg</button>
+      <button class="period-btn" data-period="4weeks" onclick="setPeriod('4weeks')">4 tyg</button>
     </div>
     <svg class="pie-svg" id="pieSvg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"></svg>
     <button class="back-btn" onclick="goBack()">wstecz</button>
@@ -542,24 +592,64 @@
     return new Date().toISOString().split('T')[0];
   }
 
+  var selectedNames = [];
+  var currentPeriod = 'today';
+
   function selectEmo(el) {
-    el.classList.add('selected');
     var name = el.dataset.name;
-    var entry = { date: today(), emotions: [name] };
+    var idx = selectedNames.indexOf(name);
+    if (idx === -1) {
+      el.classList.add('selected');
+      selectedNames.push(name);
+    } else {
+      el.classList.remove('selected');
+      selectedNames.splice(idx, 1);
+    }
+    document.getElementById('confirmBtn').classList.toggle('hidden', selectedNames.length === 0);
+  }
+
+  function confirmSelection() {
+    if (selectedNames.length === 0) return;
+    var entry = { date: today(), emotions: selectedNames.slice() };
     entries.push(entry);
     localStorage.setItem('panigosia_entries', JSON.stringify(entries));
     localStorage.setItem('panigosia_last_vote', today());
-    setTimeout(function() {
-      renderPie();
-      document.getElementById('screen1').classList.add('hidden-left');
-      document.getElementById('screen2').classList.remove('hidden');
-    }, 300);
+    currentPeriod = 'today';
+    updatePeriodButtons();
+    renderPie(true);
+    document.getElementById('screen1').classList.add('hidden-left');
+    document.getElementById('screen2').classList.remove('hidden');
   }
 
   function goBack() {
+    selectedNames = [];
     document.querySelectorAll('.emo.selected').forEach(function(el) { el.classList.remove('selected'); });
+    document.getElementById('confirmBtn').classList.add('hidden');
     document.getElementById('screen2').classList.add('hidden');
     document.getElementById('screen1').classList.remove('hidden-left');
+  }
+
+  // Swipe left on screen1 to confirm
+  (function() {
+    var s1 = document.getElementById('screen1');
+    var startX = 0;
+    s1.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; }, { passive: true });
+    s1.addEventListener('touchend', function(e) {
+      var dx = e.changedTouches[0].clientX - startX;
+      if (dx < -60 && selectedNames.length > 0) confirmSelection();
+    }, { passive: true });
+  })();
+
+  function setPeriod(p) {
+    currentPeriod = p;
+    updatePeriodButtons();
+    renderPie(true);
+  }
+
+  function updatePeriodButtons() {
+    document.querySelectorAll('.period-btn').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.period === currentPeriod);
+    });
   }
 
   function showModal() {
@@ -611,15 +701,26 @@
     });
   }
 
-  function renderPie() {
+  function getFilteredEntries() {
+    var now = new Date();
+    var cutoff = new Date(now);
+    if (currentPeriod === 'today') cutoff.setHours(0, 0, 0, 0);
+    else if (currentPeriod === 'week') cutoff.setDate(now.getDate() - 7);
+    else if (currentPeriod === '2weeks') cutoff.setDate(now.getDate() - 14);
+    else if (currentPeriod === '4weeks') cutoff.setDate(now.getDate() - 28);
+    var cutoffStr = cutoff.toISOString().split('T')[0];
+    return entries.filter(function(e) { return e.date >= cutoffStr; });
+  }
+
+  function renderPie(animate) {
     var svg = document.getElementById('pieSvg');
     while (svg.firstChild) svg.removeChild(svg.firstChild);
 
-    var recent = entries.slice(-7);
+    var filtered = getFilteredEntries();
     var counts = {};
     var total = 0;
-    for (var i = 0; i < recent.length; i++) {
-      var emos = recent[i].emotions;
+    for (var i = 0; i < filtered.length; i++) {
+      var emos = filtered[i].emotions;
       for (var j = 0; j < emos.length; j++) {
         var n = emos[j];
         counts[n] = (counts[n] || 0) + 1;
@@ -642,8 +743,19 @@
       var circle = document.createElementNS(ns, 'circle');
       circle.setAttribute('cx', cx);
       circle.setAttribute('cy', cy);
-      circle.setAttribute('r', r);
+      circle.setAttribute('r', animate ? '0' : String(r));
       circle.setAttribute('fill', pieBg);
+      if (animate) {
+        var anim = document.createElementNS(ns, 'animate');
+        anim.setAttribute('attributeName', 'r');
+        anim.setAttribute('from', '0');
+        anim.setAttribute('to', String(r));
+        anim.setAttribute('dur', '0.6s');
+        anim.setAttribute('fill', 'freeze');
+        anim.setAttribute('calcMode', 'spline');
+        anim.setAttribute('keySplines', '0.4 0 0.2 1');
+        circle.appendChild(anim);
+      }
       svg.appendChild(circle);
       var text = document.createElementNS(ns, 'text');
       text.setAttribute('x', cx);
@@ -653,65 +765,94 @@
       text.setAttribute('font-size', '20');
       text.setAttribute('font-weight', '600');
       text.setAttribute('fill', currentTheme === 'dark' ? '#ffffff' : c.color);
+      text.setAttribute('opacity', animate ? '0' : '1');
       text.textContent = name;
       svg.appendChild(text);
+      if (animate) setTimeout(function() { text.setAttribute('opacity', '1'); }, 500);
       return;
     }
 
+    // Multi-segment spiral animation: segments appear one by one sweeping in
     var startAngle = -90;
+    var segDelay = animate ? 120 : 0;
+    var segDur = animate ? 0.4 : 0;
 
     for (var i = 0; i < sorted.length; i++) {
-      var name = sorted[i][0];
-      var count = sorted[i][1];
-      var sweep = (count / total) * 360;
-      var endAngle = startAngle + sweep;
-      var startRad = (startAngle * Math.PI) / 180;
-      var endRad = (endAngle * Math.PI) / 180;
-      var x1 = cx + r * Math.cos(startRad);
-      var y1 = cy + r * Math.sin(startRad);
-      var x2 = cx + r * Math.cos(endRad);
-      var y2 = cy + r * Math.sin(endRad);
-      var largeArc = sweep > 180 ? 1 : 0;
-      var c = colorMap[name] || { bg: 'rgba(200,200,200,0.3)', color: '#ccc' };
-      // Boost pie segment opacity for better contrast
-      var pieBg = c.bg.replace(/,\s*[\d.]+\)$/, currentTheme === 'dark' ? ',0.55)' : ',0.7)');
+      (function(idx) {
+        var name = sorted[idx][0];
+        var count = sorted[idx][1];
+        var sweep = (count / total) * 360;
+        var endAngle = startAngle + sweep;
+        var c = colorMap[name] || { bg: 'rgba(200,200,200,0.3)', color: '#ccc' };
+        var pieBg = c.bg.replace(/,\s*[\d.]+\)$/, currentTheme === 'dark' ? ',0.55)' : ',0.7)');
+        var sA = startAngle;
 
-      var path = document.createElementNS(ns, 'path');
-      path.setAttribute('d', 'M' + cx + ',' + cy + ' L' + x1 + ',' + y1 + ' A' + r + ',' + r + ' 0 ' + largeArc + ',1 ' + x2 + ',' + y2 + ' Z');
-      path.setAttribute('fill', pieBg);
-      svg.appendChild(path);
+        function drawSegment() {
+          var startRad = (sA * Math.PI) / 180;
+          var endRad = (endAngle * Math.PI) / 180;
+          var x1 = cx + r * Math.cos(startRad);
+          var y1 = cy + r * Math.sin(startRad);
+          var x2 = cx + r * Math.cos(endRad);
+          var y2 = cy + r * Math.sin(endRad);
+          var largeArc = sweep > 180 ? 1 : 0;
 
-      var line = document.createElementNS(ns, 'line');
-      line.setAttribute('x1', cx);
-      line.setAttribute('y1', cy);
-      line.setAttribute('x2', x1);
-      line.setAttribute('y2', y1);
-      line.setAttribute('stroke', 'rgba(255,255,255,0.08)');
-      line.setAttribute('stroke-width', '0.5');
-      svg.appendChild(line);
+          var path = document.createElementNS(ns, 'path');
+          path.setAttribute('d', 'M' + cx + ',' + cy + ' L' + x1 + ',' + y1 + ' A' + r + ',' + r + ' 0 ' + largeArc + ',1 ' + x2 + ',' + y2 + ' Z');
+          path.setAttribute('fill', pieBg);
+          if (animate) {
+            path.style.opacity = '0';
+            path.style.transition = 'opacity ' + segDur + 's ease';
+          }
+          svg.appendChild(path);
 
-      var midRad = ((startAngle + sweep / 2) * Math.PI) / 180;
-      var lr = r * 0.6;
-      var lx = cx + lr * Math.cos(midRad);
-      var ly = cy + lr * Math.sin(midRad);
+          var line = document.createElementNS(ns, 'line');
+          line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+          line.setAttribute('x2', x1); line.setAttribute('y2', y1);
+          line.setAttribute('stroke', 'rgba(255,255,255,0.08)');
+          line.setAttribute('stroke-width', '0.5');
+          if (animate) { line.style.opacity = '0'; line.style.transition = 'opacity ' + segDur + 's ease'; }
+          svg.appendChild(line);
 
-      var text = document.createElementNS(ns, 'text');
-      text.setAttribute('x', lx);
-      text.setAttribute('y', ly);
-      text.setAttribute('font-size', sweep > 30 ? '14' : '10');
-      text.setAttribute('font-weight', '600');
-      text.setAttribute('fill', currentTheme === 'dark' ? '#ffffff' : c.color);
-      text.textContent = name;
-      svg.appendChild(text);
+          var midRad = ((sA + sweep / 2) * Math.PI) / 180;
+          var lr = r * 0.6;
+          var lx = cx + lr * Math.cos(midRad);
+          var ly = cy + lr * Math.sin(midRad);
 
-      startAngle = endAngle;
+          var text = document.createElementNS(ns, 'text');
+          text.setAttribute('x', lx); text.setAttribute('y', ly);
+          text.setAttribute('font-size', sweep > 30 ? '14' : '10');
+          text.setAttribute('font-weight', '600');
+          text.setAttribute('fill', currentTheme === 'dark' ? '#ffffff' : c.color);
+          text.textContent = name;
+          if (animate) { text.style.opacity = '0'; text.style.transition = 'opacity 0.3s ease'; }
+          svg.appendChild(text);
+
+          if (animate) {
+            requestAnimationFrame(function() {
+              path.style.opacity = '1';
+              line.style.opacity = '1';
+              setTimeout(function() { text.style.opacity = '1'; }, segDur * 600);
+            });
+          }
+        }
+
+        if (animate) {
+          setTimeout(drawSegment, idx * segDelay);
+        } else {
+          drawSegment();
+        }
+
+        startAngle = endAngle;
+      })(i);
     }
   }
 
   renderWheel();
 
   if (localStorage.getItem('panigosia_last_vote') === today()) {
-    renderPie();
+    currentPeriod = 'today';
+    updatePeriodButtons();
+    renderPie(false);
     document.getElementById('screen1').classList.add('hidden-left');
     document.getElementById('screen2').classList.remove('hidden');
   }
