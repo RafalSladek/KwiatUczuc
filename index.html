@@ -6,7 +6,8 @@
 <title>kONtakt — Włącz się na siebie</title>
 <meta property="og:title" content="kONtakt — Włącz się na siebie">
 <meta property="og:description" content="Emocje, potrzeby, wewnętrzne spełnienie. Wieczorny rytuał emocjonalny dla rodzin.">
-<meta property="og:image" content="https://rafalsladek.github.io/kONtakt/icons/icon-512.png">
+<meta property="og:image" content="https://kontakt.rafal-sladek.com/icons/icon-512.png">
+<meta property="og:url" content="https://kontakt.rafal-sladek.com/">
 <meta property="og:type" content="website">
 <meta name="description" content="kONtakt — wieczorny rytuał emocjonalny dla rodzin. Rozpoznawaj i nazywaj swoje stany emocjonalne.">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
@@ -111,6 +112,9 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     animation: breathe 3s ease-in-out infinite;
     animation-delay: var(--breathe-delay, 0s);
+  }
+  .petal-text {
+    transition: transform 0.9s ease;
   }
 
   @keyframes breathe {
@@ -461,23 +465,27 @@
       arcW = Math.max(36, Math.min(arcW, petalLen * 0.6));
       var fontSize = Math.max(0.6, 0.78 * arcW / 60);
 
+      // Each petal gets unique proportions for organic variety
+      var petalVariations = [0.85, 1.0, 0.9, 1.1, 0.95, 1.05, 0.88, 0.97, 1.08, 0.92, 1.02];
+      var widthVariations = [1.0, 0.85, 1.1, 0.9, 1.05, 0.88, 0.95, 1.08, 0.92, 1.0, 0.87];
       emoElements.forEach(function(el, i) {
         var angle = (2 * Math.PI * i / count) - Math.PI / 2;
-        var dx = Math.cos(angle);
-        var dy = Math.sin(angle);
-        var x = cx + midR * dx;
-        var y = cy + midR * dy;
-        var absX = Math.abs(dx);
-        var absY = Math.abs(dy);
-        var radial = petalLen;
-        var tangent = arcW;
-        var w = tangent + (radial - tangent) * absX;
-        var h = tangent + (radial - tangent) * absY;
-        el.style.width = Math.round(w) + 'px';
-        el.style.height = Math.round(h) + 'px';
+        var hScale = petalVariations[i % petalVariations.length];
+        var wScale = widthVariations[i % widthVariations.length];
+        var pw = Math.round(arcW * wScale);
+        var ph = Math.round(petalLen * hScale);
+        var dist = midR + (petalLen * (hScale - 1) * 0.5);
+        var x = cx + dist * Math.cos(angle);
+        var y = cy + dist * Math.sin(angle);
+        el.style.width = pw + 'px';
+        el.style.height = ph + 'px';
         el.style.left = x + 'px';
         el.style.top = y + 'px';
         el.style.fontSize = fontSize + 'rem';
+        var deg = angle * 180 / Math.PI + 90;
+        el.style.transform = 'translate(-50%, -50%) rotate(' + deg + 'deg)';
+        var span = el.querySelector('.petal-text');
+        if (span) span.style.transform = 'rotate(' + (-deg) + 'deg)';
       });
     } else {
       var layout = computeCircleLayout(count);
@@ -494,6 +502,9 @@
         el.style.left = x + 'px';
         el.style.top = y + 'px';
         el.style.fontSize = fontSize + 'rem';
+        el.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+        var span = el.querySelector('.petal-text');
+        if (span) span.style.transform = 'rotate(0deg)';
       });
     }
   }
