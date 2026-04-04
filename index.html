@@ -313,39 +313,42 @@
   var customEmotions = JSON.parse(localStorage.getItem('panigosia_custom') || '[]');
   var entries = JSON.parse(localStorage.getItem('panigosia_entries') || '[]');
 
+  /* Colors based on original Feelings Wheel (Dr. Gloria Willcox)
+     Happy=#F0D860  Sad=#6B9DC8  Disgusted=#7AB48C  Angry=#E88878
+     Fearful=#A8C878  Bad=#8BA0C0  Surprised=#C8A0D0 */
   var darkColors = {
     emotions: [
-      { name: 'radość', bg: 'rgba(239,83,80,0.25)', color: '#ffcdd2' },
-      { name: 'smutek', bg: 'rgba(149,117,205,0.25)', color: '#d1c4e9' },
-      { name: 'wstręt', bg: 'rgba(102,187,106,0.25)', color: '#c8e6c9' },
-      { name: 'złość', bg: 'rgba(255,167,38,0.25)', color: '#ffe0b2' },
-      { name: 'strach', bg: 'rgba(186,104,200,0.25)', color: '#e1bee7' },
-      { name: 'dyskomfort', bg: 'rgba(100,181,246,0.25)', color: '#bbdefb' },
-      { name: 'zaskoczenie', bg: 'rgba(255,235,59,0.25)', color: '#fff9c4' }
+      { name: 'radość', bg: 'rgba(240,216,96,0.28)', color: '#f5e8a0' },
+      { name: 'smutek', bg: 'rgba(107,157,200,0.28)', color: '#a8cce8' },
+      { name: 'wstręt', bg: 'rgba(122,180,140,0.28)', color: '#a8d8b8' },
+      { name: 'złość', bg: 'rgba(232,136,120,0.28)', color: '#f0b8a8' },
+      { name: 'strach', bg: 'rgba(168,200,120,0.28)', color: '#c8e0a0' },
+      { name: 'dyskomfort', bg: 'rgba(139,160,192,0.28)', color: '#b8c8e0' },
+      { name: 'zaskoczenie', bg: 'rgba(200,160,208,0.28)', color: '#d8c0e0' }
     ],
     custom: [
-      { bg: 'rgba(255,213,79,0.25)', color: '#fff8e1' },
-      { bg: 'rgba(77,208,225,0.25)', color: '#b2ebf2' },
-      { bg: 'rgba(255,138,101,0.25)', color: '#ffddc1' },
-      { bg: 'rgba(174,213,129,0.25)', color: '#dcedc8' }
+      { bg: 'rgba(220,190,120,0.28)', color: '#e8d8a0' },
+      { bg: 'rgba(120,180,180,0.28)', color: '#a0d0d0' },
+      { bg: 'rgba(210,150,140,0.28)', color: '#e0b8b0' },
+      { bg: 'rgba(150,200,140,0.28)', color: '#b8d8a8' }
     ]
   };
 
   var pastelColors = {
     emotions: [
-      { name: 'radość', bg: 'rgba(248,180,200,0.55)', color: '#a13060' },
-      { name: 'smutek', bg: 'rgba(195,177,225,0.55)', color: '#4a3070' },
-      { name: 'wstręt', bg: 'rgba(180,220,180,0.55)', color: '#2e6e2e' },
-      { name: 'złość', bg: 'rgba(255,204,153,0.55)', color: '#a05a10' },
-      { name: 'strach', bg: 'rgba(216,180,228,0.55)', color: '#6a3080' },
-      { name: 'dyskomfort', bg: 'rgba(167,199,249,0.55)', color: '#2a55a0' },
-      { name: 'zaskoczenie', bg: 'rgba(255,235,170,0.55)', color: '#7a6510' }
+      { name: 'radość', bg: 'rgba(240,216,96,0.45)', color: '#8a7820' },
+      { name: 'smutek', bg: 'rgba(107,157,200,0.45)', color: '#2a5580' },
+      { name: 'wstręt', bg: 'rgba(122,180,140,0.45)', color: '#2a6040' },
+      { name: 'złość', bg: 'rgba(232,136,120,0.45)', color: '#903028' },
+      { name: 'strach', bg: 'rgba(168,200,120,0.45)', color: '#4a6020' },
+      { name: 'dyskomfort', bg: 'rgba(139,160,192,0.45)', color: '#3a4870' },
+      { name: 'zaskoczenie', bg: 'rgba(200,160,208,0.45)', color: '#5a3068' }
     ],
     custom: [
-      { bg: 'rgba(255,235,170,0.55)', color: '#7a6510' },
-      { bg: 'rgba(170,225,235,0.55)', color: '#1a6a7a' },
-      { bg: 'rgba(255,195,170,0.55)', color: '#8a3a10' },
-      { bg: 'rgba(200,230,180,0.55)', color: '#3a6a1a' }
+      { bg: 'rgba(220,190,120,0.45)', color: '#786020' },
+      { bg: 'rgba(120,180,180,0.45)', color: '#1a5858' },
+      { bg: 'rgba(210,150,140,0.45)', color: '#703020' },
+      { bg: 'rgba(150,200,140,0.45)', color: '#2a5820' }
     ]
   };
 
@@ -382,24 +385,23 @@
   var currentEmotions = [];
 
   var miniFlowerSvg = '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">'
-    + '<circle cx="20" cy="20" r="19" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="0.5"/>'
-    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(239,83,80,0.4)" transform="rotate(0,20,20)"/>'
-    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(149,117,205,0.4)" transform="rotate(51.4,20,20)"/>'
-    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(102,187,106,0.4)" transform="rotate(102.8,20,20)"/>'
-    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(255,167,38,0.4)" transform="rotate(154.3,20,20)"/>'
-    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(186,104,200,0.4)" transform="rotate(205.7,20,20)"/>'
-    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(100,181,246,0.4)" transform="rotate(257.1,20,20)"/>'
-    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(255,235,59,0.4)" transform="rotate(308.6,20,20)"/>'
+    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(240,216,96,0.5)" transform="rotate(0,20,20)"/>'
+    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(107,157,200,0.5)" transform="rotate(51.4,20,20)"/>'
+    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(122,180,140,0.5)" transform="rotate(102.8,20,20)"/>'
+    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(232,136,120,0.5)" transform="rotate(154.3,20,20)"/>'
+    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(168,200,120,0.5)" transform="rotate(205.7,20,20)"/>'
+    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(139,160,192,0.5)" transform="rotate(257.1,20,20)"/>'
+    + '<ellipse cx="20" cy="11" rx="5" ry="8" fill="rgba(200,160,208,0.5)" transform="rotate(308.6,20,20)"/>'
     + '</svg>';
 
   var miniCircleSvg = '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">'
-    + '<circle cx="20" cy="8" r="4.5" fill="rgba(239,83,80,0.45)"/>'
-    + '<circle cx="28.5" cy="12.5" r="4.5" fill="rgba(149,117,205,0.45)"/>'
-    + '<circle cx="30" cy="22" r="4.5" fill="rgba(102,187,106,0.45)"/>'
-    + '<circle cx="24" cy="30" r="4.5" fill="rgba(255,167,38,0.45)"/>'
-    + '<circle cx="16" cy="30" r="4.5" fill="rgba(186,104,200,0.45)"/>'
-    + '<circle cx="10" cy="22" r="4.5" fill="rgba(100,181,246,0.45)"/>'
-    + '<circle cx="11.5" cy="12.5" r="4.5" fill="rgba(255,235,59,0.45)"/>'
+    + '<circle cx="20" cy="8" r="4.5" fill="rgba(240,216,96,0.5)"/>'
+    + '<circle cx="28.5" cy="12.5" r="4.5" fill="rgba(107,157,200,0.5)"/>'
+    + '<circle cx="30" cy="22" r="4.5" fill="rgba(122,180,140,0.5)"/>'
+    + '<circle cx="24" cy="30" r="4.5" fill="rgba(232,136,120,0.5)"/>'
+    + '<circle cx="16" cy="30" r="4.5" fill="rgba(168,200,120,0.5)"/>'
+    + '<circle cx="10" cy="22" r="4.5" fill="rgba(139,160,192,0.5)"/>'
+    + '<circle cx="11.5" cy="12.5" r="4.5" fill="rgba(200,160,208,0.5)"/>'
     + '</svg>';
 
   function updateToggleIcon() {
