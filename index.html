@@ -71,7 +71,7 @@
     pointer-events: none;
   }
 
-  .app-header { text-align: center; margin-bottom: 8px; }
+  .app-header { text-align: center; margin-bottom: 4px; }
 
   .app-title {
     font-size: 2rem; font-weight: 300; letter-spacing: 0.08em;
@@ -82,7 +82,7 @@
   .app-subtitle { font-size: 0.9rem; color: #6666aa; margin-top: 4px; }
 
   .screen-question {
-    text-align: center; color: #9999bb; font-size: 1.1rem; margin: 20px 0 16px;
+    text-align: center; color: #9999bb; font-size: 1.1rem; margin: 10px 0 8px;
   }
 
   .emotion-circle {
@@ -476,22 +476,22 @@
   }
 
   function computeCircleLayout(count) {
-    var maxW = window.innerWidth - 40;
-    var maxH = window.innerHeight * 0.55;
+    var maxW = window.innerWidth - 24;
+    var maxH = window.innerHeight * 0.68;
     var maxDim = Math.min(maxW, maxH);
     var gap = 10;
     var sinVal = Math.sin(Math.PI / count);
-    var emoSize = Math.round(78 * Math.min(1, 7 / count));
-    emoSize = Math.max(44, emoSize);
+    var emoSize = Math.round(100 * Math.min(1, 7 / count));
+    emoSize = Math.max(50, emoSize);
     var rMin = (emoSize + gap) / (2 * sinVal);
     var rMax = (maxDim - emoSize) / 2 - 4;
     if (rMin > rMax) {
       emoSize = Math.round((2 * sinVal * (rMax + 4) * 2 + 2 * sinVal * (-gap)) / (1 + 2 * sinVal));
-      emoSize = Math.max(40, Math.min(emoSize, 78));
+      emoSize = Math.max(46, Math.min(emoSize, 100));
       rMin = (emoSize + gap) / (2 * sinVal);
     }
     var radius = Math.min(rMin, rMax);
-    return { emoSize: emoSize, radius: radius, fontSize: Math.max(0.65, 0.85 * emoSize / 78) };
+    return { emoSize: emoSize, radius: radius, fontSize: Math.max(0.7, 0.9 * emoSize / 100) };
   }
 
   function getContainerSize(count) {
