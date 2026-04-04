@@ -167,12 +167,63 @@
   }
   .modal-cancel { background: rgba(255,255,255,0.06); color: #9999bb; }
   .modal-save { background: linear-gradient(135deg, #7c4dff, #536dfe); color: white; }
+
+  .theme-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 60;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+    color: #aaa; border-radius: 20px; padding: 8px 16px;
+    font-size: 0.85rem; cursor: pointer; font-family: inherit;
+    transition: all 0.3s ease;
+  }
+  .theme-toggle:hover { background: rgba(255,255,255,0.18); }
+
+  /* === Pastel theme === */
+  body.pastel {
+    background: linear-gradient(135deg, #fef9f3 0%, #fdf2e9 30%, #f5e6d8 60%, #fef9f3 100%);
+    color: #3d3d5c;
+  }
+  body.pastel .bg-orb:nth-child(1) { background: #f8b4d9; opacity: 0.25; }
+  body.pastel .bg-orb:nth-child(2) { background: #a7c7f9; opacity: 0.25; }
+  body.pastel .app-title {
+    background: linear-gradient(135deg, #e8729a, #7b8cde, #5cbfb0);
+    -webkit-background-clip: text; background-clip: text;
+  }
+  body.pastel .app-subtitle { color: #9a8fad; }
+  body.pastel .screen-question { color: #7a7a9a; }
+  body.pastel .add-btn { color: #8b6fc0; }
+  body.pastel .add-btn:hover { color: #a78bdb; }
+  body.pastel .pie-period { color: #9a8fad; }
+  body.pastel .back-btn {
+    background: rgba(0,0,0,0.05); color: #7a7a9a;
+    border-color: rgba(0,0,0,0.1);
+  }
+  body.pastel .back-btn:hover { background: rgba(0,0,0,0.08); color: #5a5a7a; }
+  body.pastel .emo.selected {
+    border-color: rgba(0,0,0,0.25);
+    box-shadow: 0 0 20px rgba(0,0,0,0.08);
+  }
+  body.pastel .theme-toggle {
+    background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.1); color: #7a7a9a;
+  }
+  body.pastel .theme-toggle:hover { background: rgba(0,0,0,0.1); }
+  body.pastel .modal-overlay { background: rgba(255,250,245,0.85); }
+  body.pastel .modal {
+    background: rgba(255,255,255,0.95); border-color: rgba(0,0,0,0.08);
+  }
+  body.pastel .modal h3 { color: #3d3d5c; }
+  body.pastel .modal input {
+    background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: #3d3d5c;
+  }
+  body.pastel .modal input:focus { border-color: #8b6fc0; }
+  body.pastel .modal-cancel { background: rgba(0,0,0,0.06); color: #7a7a9a; }
+  body.pastel .pie-svg { filter: drop-shadow(0 4px 20px rgba(0,0,0,0.08)); }
 </style>
 </head>
 <body>
 
 <div class="bg-orb"></div>
 <div class="bg-orb"></div>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">pastel</button>
 
 <div class="app">
 
@@ -215,24 +266,67 @@
   var customEmotions = JSON.parse(localStorage.getItem('panigosia_custom') || '[]');
   var entries = JSON.parse(localStorage.getItem('panigosia_entries') || '[]');
 
-  var baseEmotions = [
-    { name: 'radość', bg: 'rgba(239,83,80,0.3)', color: '#ef5350' },
-    { name: 'spokój', bg: 'rgba(66,165,245,0.3)', color: '#42a5f5' },
-    { name: 'złość', bg: 'rgba(255,167,38,0.3)', color: '#ffa726' },
-    { name: 'smutek', bg: 'rgba(126,87,194,0.3)', color: '#7e57c2' },
-    { name: 'strach', bg: 'rgba(171,71,188,0.3)', color: '#ab47bc' },
-    { name: 'ciekawość', bg: 'rgba(102,187,106,0.3)', color: '#66bb6a' }
-  ];
+  var darkColors = {
+    emotions: [
+      { name: 'radość', bg: 'rgba(239,83,80,0.3)', color: '#ef5350' },
+      { name: 'spokój', bg: 'rgba(66,165,245,0.3)', color: '#42a5f5' },
+      { name: 'złość', bg: 'rgba(255,167,38,0.3)', color: '#ffa726' },
+      { name: 'smutek', bg: 'rgba(126,87,194,0.3)', color: '#7e57c2' },
+      { name: 'strach', bg: 'rgba(171,71,188,0.3)', color: '#ab47bc' },
+      { name: 'ciekawość', bg: 'rgba(102,187,106,0.3)', color: '#66bb6a' }
+    ],
+    custom: [
+      { bg: 'rgba(255,213,79,0.3)', color: '#ffd54f' },
+      { bg: 'rgba(77,208,225,0.3)', color: '#4dd0e1' },
+      { bg: 'rgba(255,138,101,0.3)', color: '#ff8a65' },
+      { bg: 'rgba(174,213,129,0.3)', color: '#aed581' }
+    ]
+  };
 
+  var pastelColors = {
+    emotions: [
+      { name: 'radość', bg: 'rgba(248,180,200,0.5)', color: '#c75480' },
+      { name: 'spokój', bg: 'rgba(167,199,249,0.5)', color: '#4a72b8' },
+      { name: 'złość', bg: 'rgba(255,204,153,0.5)', color: '#c47a2a' },
+      { name: 'smutek', bg: 'rgba(195,177,225,0.5)', color: '#6b4f8a' },
+      { name: 'strach', bg: 'rgba(216,180,228,0.5)', color: '#8a4f9a' },
+      { name: 'ciekawość', bg: 'rgba(180,220,180,0.5)', color: '#4a8a4a' }
+    ],
+    custom: [
+      { bg: 'rgba(255,235,170,0.5)', color: '#a08520' },
+      { bg: 'rgba(170,225,235,0.5)', color: '#3a8a9a' },
+      { bg: 'rgba(255,195,170,0.5)', color: '#b05a30' },
+      { bg: 'rgba(200,230,180,0.5)', color: '#5a8a3a' }
+    ]
+  };
+
+  var currentTheme = localStorage.getItem('panigosia_theme') || 'dark';
+  var baseEmotions = darkColors.emotions;
+  var customColors = darkColors.custom;
   var colorMap = {};
-  baseEmotions.forEach(function(e) { colorMap[e.name] = { bg: e.bg, color: e.color }; });
 
-  var customColors = [
-    { bg: 'rgba(255,213,79,0.3)', color: '#ffd54f' },
-    { bg: 'rgba(77,208,225,0.3)', color: '#4dd0e1' },
-    { bg: 'rgba(255,138,101,0.3)', color: '#ff8a65' },
-    { bg: 'rgba(174,213,129,0.3)', color: '#aed581' }
-  ];
+  function applyTheme() {
+    var palette = currentTheme === 'pastel' ? pastelColors : darkColors;
+    baseEmotions = palette.emotions;
+    customColors = palette.custom;
+    colorMap = {};
+    baseEmotions.forEach(function(e) { colorMap[e.name] = { bg: e.bg, color: e.color }; });
+    if (currentTheme === 'pastel') {
+      document.body.classList.add('pastel');
+    } else {
+      document.body.classList.remove('pastel');
+    }
+    document.getElementById('themeToggle').textContent = currentTheme === 'dark' ? 'pastel' : 'ciemny';
+  }
+
+  function toggleTheme() {
+    currentTheme = currentTheme === 'dark' ? 'pastel' : 'dark';
+    localStorage.setItem('panigosia_theme', currentTheme);
+    applyTheme();
+    renderWheel();
+  }
+
+  applyTheme();
 
   function getScaleFactor(count) {
     if (count <= 6) return 1;
