@@ -281,35 +281,37 @@
 
   var darkColors = {
     emotions: [
-      { name: 'radość', bg: 'rgba(239,83,80,0.3)', color: '#ef5350' },
-      { name: 'spokój', bg: 'rgba(66,165,245,0.3)', color: '#42a5f5' },
-      { name: 'złość', bg: 'rgba(255,167,38,0.3)', color: '#ffa726' },
-      { name: 'smutek', bg: 'rgba(126,87,194,0.3)', color: '#7e57c2' },
-      { name: 'strach', bg: 'rgba(171,71,188,0.3)', color: '#ab47bc' },
-      { name: 'ciekawość', bg: 'rgba(102,187,106,0.3)', color: '#66bb6a' }
+      { name: 'radość', bg: 'rgba(239,83,80,0.25)', color: '#ffcdd2' },
+      { name: 'smutek', bg: 'rgba(149,117,205,0.25)', color: '#d1c4e9' },
+      { name: 'wstręt', bg: 'rgba(102,187,106,0.25)', color: '#c8e6c9' },
+      { name: 'złość', bg: 'rgba(255,167,38,0.25)', color: '#ffe0b2' },
+      { name: 'strach', bg: 'rgba(186,104,200,0.25)', color: '#e1bee7' },
+      { name: 'dyskomfort', bg: 'rgba(100,181,246,0.25)', color: '#bbdefb' },
+      { name: 'zaskoczenie', bg: 'rgba(255,235,59,0.25)', color: '#fff9c4' }
     ],
     custom: [
-      { bg: 'rgba(255,213,79,0.3)', color: '#ffd54f' },
-      { bg: 'rgba(77,208,225,0.3)', color: '#4dd0e1' },
-      { bg: 'rgba(255,138,101,0.3)', color: '#ff8a65' },
-      { bg: 'rgba(174,213,129,0.3)', color: '#aed581' }
+      { bg: 'rgba(255,213,79,0.25)', color: '#fff8e1' },
+      { bg: 'rgba(77,208,225,0.25)', color: '#b2ebf2' },
+      { bg: 'rgba(255,138,101,0.25)', color: '#ffddc1' },
+      { bg: 'rgba(174,213,129,0.25)', color: '#dcedc8' }
     ]
   };
 
   var pastelColors = {
     emotions: [
-      { name: 'radość', bg: 'rgba(248,180,200,0.5)', color: '#c75480' },
-      { name: 'spokój', bg: 'rgba(167,199,249,0.5)', color: '#4a72b8' },
-      { name: 'złość', bg: 'rgba(255,204,153,0.5)', color: '#c47a2a' },
-      { name: 'smutek', bg: 'rgba(195,177,225,0.5)', color: '#6b4f8a' },
-      { name: 'strach', bg: 'rgba(216,180,228,0.5)', color: '#8a4f9a' },
-      { name: 'ciekawość', bg: 'rgba(180,220,180,0.5)', color: '#4a8a4a' }
+      { name: 'radość', bg: 'rgba(248,180,200,0.55)', color: '#a13060' },
+      { name: 'smutek', bg: 'rgba(195,177,225,0.55)', color: '#4a3070' },
+      { name: 'wstręt', bg: 'rgba(180,220,180,0.55)', color: '#2e6e2e' },
+      { name: 'złość', bg: 'rgba(255,204,153,0.55)', color: '#a05a10' },
+      { name: 'strach', bg: 'rgba(216,180,228,0.55)', color: '#6a3080' },
+      { name: 'dyskomfort', bg: 'rgba(167,199,249,0.55)', color: '#2a55a0' },
+      { name: 'zaskoczenie', bg: 'rgba(255,235,170,0.55)', color: '#7a6510' }
     ],
     custom: [
-      { bg: 'rgba(255,235,170,0.5)', color: '#a08520' },
-      { bg: 'rgba(170,225,235,0.5)', color: '#3a8a9a' },
-      { bg: 'rgba(255,195,170,0.5)', color: '#b05a30' },
-      { bg: 'rgba(200,230,180,0.5)', color: '#5a8a3a' }
+      { bg: 'rgba(255,235,170,0.55)', color: '#7a6510' },
+      { bg: 'rgba(170,225,235,0.55)', color: '#1a6a7a' },
+      { bg: 'rgba(255,195,170,0.55)', color: '#8a3a10' },
+      { bg: 'rgba(200,230,180,0.55)', color: '#3a6a1a' }
     ]
   };
 
@@ -342,9 +344,9 @@
   applyTheme();
 
   function getScaleFactor(count) {
-    if (count <= 6) return 1;
-    if (count <= 8) return 0.85;
-    if (count <= 10) return 0.72;
+    if (count <= 7) return 1;
+    if (count <= 9) return 0.85;
+    if (count <= 11) return 0.72;
     return 0.6;
   }
 
