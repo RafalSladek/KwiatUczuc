@@ -18,19 +18,24 @@ const DEVICES = {
   desktop: { viewport: { width: 1280, height: 800 }, name: 'desktop' },
 };
 
-// Seed 3-4 past entries so screen2 pie chart has data
-const SEED_ENTRIES = [
-  { date: seedDate(-3), emotions: ['radość'] },
-  { date: seedDate(-2), emotions: ['smutek'] },
-  { date: seedDate(-2), emotions: ['strach'] },
-  { date: seedDate(-1), emotions: ['złość'] },
-];
-
 function seedDate(offset) {
   const d = new Date();
   d.setDate(d.getDate() + offset);
   return d.toISOString().slice(0, 10);
 }
+
+// Seed entries spanning 4 weeks
+const SEED_ENTRIES = [
+  { date: seedDate(-27), emotions: ['radość', 'zaskoczenie'] },
+  { date: seedDate(-25), emotions: ['smutek'] },
+  { date: seedDate(-22), emotions: ['strach', 'złość'] },
+  { date: seedDate(-13), emotions: ['wstręt'] },
+  { date: seedDate(-11), emotions: ['radość', 'dyskomfort'] },
+  { date: seedDate(-9), emotions: ['zaskoczenie', 'strach'] },
+  { date: seedDate(-5), emotions: ['radość'] },
+  { date: seedDate(-3), emotions: ['smutek', 'strach'] },
+  { date: seedDate(-1), emotions: ['złość'] },
+];
 
 (async () => {
   const args = process.argv.slice(2);
@@ -58,7 +63,7 @@ function seedDate(offset) {
   const page = await ctx.newPage();
   const url = 'file://' + path.resolve(__dirname, '..', 'index.html');
 
-  // Seed entries
+  // Seed entries (no today entry — user will select in the flow)
   await page.addInitScript((entries) => {
     localStorage.setItem('panigosia_entries', JSON.stringify(entries));
     localStorage.removeItem('panigosia_last_vote');
@@ -95,30 +100,57 @@ function seedDate(offset) {
   await animate(5, 200);
   await hold(2);
 
-  // 4. Select emotion → screen2 (pie chart with seeded data)
+  // 4. Multi-select: click 2 emotions
   await page.evaluate(() => {
     const emos = document.querySelectorAll('.emo');
     if (emos[0]) emos[0].click();
   });
-  await page.waitForTimeout(500);
-  await hold(4);
+  await page.waitForTimeout(400);
+  await shot();
+  await page.evaluate(() => {
+    const emos = document.querySelectorAll('.emo');
+    if (emos[3]) emos[3].click();
+  });
+  await page.waitForTimeout(400);
+  await hold(2); // Show multi-select with Gotowe button
 
-  // 5. Go back
+  // 5. Confirm → screen2 with "dziś" (spiral animation)
+  await click('#confirmBtn');
+  await animate(4, 300);
+  await hold(3);
+
+  // 6. Switch to "tydzień" (spiral animation)
+  await page.evaluate(() => {
+    const btn = document.querySelector('[data-period="week"]');
+    if (btn) btn.click();
+  });
+  await animate(4, 300);
+  await hold(2);
+
+  // 7. Switch to "4 tyg" (spiral animation)
+  await page.evaluate(() => {
+    const btn = document.querySelector('[data-period="4weeks"]');
+    if (btn) btn.click();
+  });
+  await animate(4, 300);
+  await hold(3);
+
+  // 8. Go back
   await click('.back-btn');
   await page.waitForTimeout(500);
   await hold(2);
 
-  // 6. Switch to dark
+  // 9. Switch to dark
   await click('#themeToggle');
   await page.waitForTimeout(500);
   await hold(3);
 
-  // 7. Dark flower
+  // 10. Dark flower
   await click('#layoutToggle');
   await animate(5, 200);
   await hold(3);
 
-  // 8. Back to dark circle
+  // 11. Back to dark circle
   await click('#layoutToggle');
   await animate(4, 200);
   await hold(2);
@@ -126,7 +158,7 @@ function seedDate(offset) {
   await browser.close();
   console.log(`Captured ${f} frames`);
 
-  // Generate GIF with ffmpeg using execFileSync (no shell injection)
+  // Generate GIF with ffmpeg
   const outDir = path.dirname(outPath);
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 

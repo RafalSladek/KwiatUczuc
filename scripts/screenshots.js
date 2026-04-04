@@ -17,19 +17,29 @@ const DEVICES = {
   desktop: { viewport: { width: 1280, height: 800 }, name: 'desktop' },
 };
 
-// 3-4 past entries to seed screen2 pie chart
-const SEED_ENTRIES = [
-  { date: seedDate(-3), emotions: ['radość'] },
-  { date: seedDate(-2), emotions: ['smutek'] },
-  { date: seedDate(-1), emotions: ['strach'] },
-  { date: seedDate(0), emotions: ['złość'] },
-];
-
+// Seed entries spanning 4 weeks for all period views
 function seedDate(offset) {
   const d = new Date();
   d.setDate(d.getDate() + offset);
   return d.toISOString().slice(0, 10);
 }
+
+const SEED_ENTRIES = [
+  // 4 weeks ago
+  { date: seedDate(-27), emotions: ['radość', 'zaskoczenie'] },
+  { date: seedDate(-25), emotions: ['smutek'] },
+  { date: seedDate(-22), emotions: ['strach', 'złość'] },
+  // 2 weeks ago
+  { date: seedDate(-13), emotions: ['wstręt'] },
+  { date: seedDate(-11), emotions: ['radość', 'dyskomfort'] },
+  { date: seedDate(-9), emotions: ['zaskoczenie', 'strach'] },
+  // This week
+  { date: seedDate(-5), emotions: ['radość'] },
+  { date: seedDate(-3), emotions: ['smutek', 'strach'] },
+  { date: seedDate(-1), emotions: ['złość'] },
+  // Today
+  { date: seedDate(0), emotions: ['radość', 'zaskoczenie'] },
+];
 
 async function takeScreenshots(deviceKey, outDir) {
   const dev = DEVICES[deviceKey];
@@ -40,7 +50,7 @@ async function takeScreenshots(deviceKey, outDir) {
   const page = await ctx.newPage();
   const url = 'file://' + path.resolve(__dirname, '..', 'index.html');
 
-  // Seed entries for pie chart on screen2
+  // Seed entries
   await page.addInitScript((entries) => {
     localStorage.setItem('panigosia_entries', JSON.stringify(entries));
     localStorage.removeItem('panigosia_last_vote');
@@ -52,27 +62,68 @@ async function takeScreenshots(deviceKey, outDir) {
 
   const prefix = dev.name;
   const shot = (name) => page.screenshot({ path: path.join(outDir, `${prefix}-${name}.png`) });
+  let count = 0;
 
   // --- Pastel (default) ---
   // Circle
   await shot('pastel-circle');
+  count++;
 
   // Flower
   await page.evaluate(() => document.querySelector('#layoutToggle').click());
   await page.waitForTimeout(1200);
   await shot('pastel-flower');
+  count++;
 
   // Back to circle
   await page.evaluate(() => document.querySelector('#layoutToggle').click());
   await page.waitForTimeout(1000);
 
-  // Select emotion → screen2 with pie chart
+  // Multi-select 2 emotions → show Gotowe button
   await page.evaluate(() => {
     const emos = document.querySelectorAll('.emo');
     if (emos[0]) emos[0].click();
+    if (emos[3]) emos[3].click();
   });
-  await page.waitForTimeout(600);
-  await shot('pastel-pie');
+  await page.waitForTimeout(300);
+  await shot('pastel-multiselect');
+  count++;
+
+  // Confirm → screen2 with "dziś" period (default)
+  await page.evaluate(() => {
+    const btn = document.querySelector('#confirmBtn');
+    if (btn) btn.click();
+  });
+  await page.waitForTimeout(800);
+  await shot('pastel-pie-today');
+  count++;
+
+  // Switch to "tydzień"
+  await page.evaluate(() => {
+    const btn = document.querySelector('[data-period="week"]');
+    if (btn) btn.click();
+  });
+  await page.waitForTimeout(1200);
+  await shot('pastel-pie-week');
+  count++;
+
+  // Switch to "2 tyg"
+  await page.evaluate(() => {
+    const btn = document.querySelector('[data-period="2weeks"]');
+    if (btn) btn.click();
+  });
+  await page.waitForTimeout(1200);
+  await shot('pastel-pie-2weeks');
+  count++;
+
+  // Switch to "4 tyg"
+  await page.evaluate(() => {
+    const btn = document.querySelector('[data-period="4weeks"]');
+    if (btn) btn.click();
+  });
+  await page.waitForTimeout(1200);
+  await shot('pastel-pie-4weeks');
+  count++;
 
   // Go back to screen1
   await page.evaluate(() => {
@@ -87,26 +138,57 @@ async function takeScreenshots(deviceKey, outDir) {
 
   // Circle
   await shot('dark-circle');
+  count++;
 
   // Flower
   await page.evaluate(() => document.querySelector('#layoutToggle').click());
   await page.waitForTimeout(1200);
   await shot('dark-flower');
+  count++;
 
   // Back to circle
   await page.evaluate(() => document.querySelector('#layoutToggle').click());
   await page.waitForTimeout(1000);
 
-  // Select emotion → screen2
+  // Multi-select 2 emotions
   await page.evaluate(() => {
     const emos = document.querySelectorAll('.emo');
     if (emos[1]) emos[1].click();
+    if (emos[4]) emos[4].click();
   });
-  await page.waitForTimeout(600);
-  await shot('dark-pie');
+  await page.waitForTimeout(300);
+  await shot('dark-multiselect');
+  count++;
+
+  // Confirm → screen2
+  await page.evaluate(() => {
+    const btn = document.querySelector('#confirmBtn');
+    if (btn) btn.click();
+  });
+  await page.waitForTimeout(800);
+  await shot('dark-pie-today');
+  count++;
+
+  // Switch to "tydzień"
+  await page.evaluate(() => {
+    const btn = document.querySelector('[data-period="week"]');
+    if (btn) btn.click();
+  });
+  await page.waitForTimeout(1200);
+  await shot('dark-pie-week');
+  count++;
+
+  // Switch to "4 tyg"
+  await page.evaluate(() => {
+    const btn = document.querySelector('[data-period="4weeks"]');
+    if (btn) btn.click();
+  });
+  await page.waitForTimeout(1200);
+  await shot('dark-pie-4weeks');
+  count++;
 
   await browser.close();
-  console.log(`  ${prefix}: 6 screenshots`);
+  console.log(`  ${prefix}: ${count} screenshots`);
 }
 
 (async () => {

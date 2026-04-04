@@ -149,11 +149,14 @@
   body.pastel .layout-toggle svg { opacity: 0.6; }
 
   .add-btn {
-    text-align: center; margin-top: 8px;
-    font-size: 1rem; color: #ce93d8; cursor: pointer; padding: 8px;
+    position: fixed; top: 16px; left: 16px; z-index: 60;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+    color: #aaa; border-radius: 20px; padding: 8px 16px;
+    font-size: 0.85rem; cursor: pointer; font-family: inherit;
+    transition: all 0.3s ease;
     -webkit-tap-highlight-color: transparent;
   }
-  .add-btn:hover { color: #e1bee7; }
+  .add-btn:hover { background: rgba(255,255,255,0.18); }
 
   .confirm-btn {
     display: block; margin: 12px auto 0; padding: 12px 40px;
@@ -282,8 +285,10 @@
   }
   body.pastel .app-subtitle { color: #9a8fad; }
   body.pastel .screen-question { color: #7a7a9a; }
-  body.pastel .add-btn { color: #8b6fc0; }
-  body.pastel .add-btn:hover { color: #a78bdb; }
+  body.pastel .add-btn {
+    background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: #7a6fa0;
+  }
+  body.pastel .add-btn:hover { background: rgba(0,0,0,0.1); }
   body.pastel .pie-period { color: #9a8fad; }
   body.pastel .back-btn {
     background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.1); color: #7a7a9a;
@@ -318,6 +323,7 @@
 
 <div class="bg-orb"></div>
 <div class="bg-orb"></div>
+<button class="add-btn" onclick="showModal()">+ emocje</button>
 <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">ciemny</button>
 
 <div class="app">
@@ -330,7 +336,6 @@
     <p class="screen-question">Jak się dziś czujesz?</p>
     <div class="emotion-circle" id="emotionCircle"></div>
     <div class="layout-toggle" id="layoutToggle" onclick="toggleLayout()"></div>
-    <div class="add-btn" onclick="showModal()">+ dodaj własny stan</div>
     <button class="confirm-btn hidden" id="confirmBtn" onclick="confirmSelection()">Gotowe</button>
   </div>
 
@@ -619,6 +624,7 @@
     renderPie(true);
     document.getElementById('screen1').classList.add('hidden-left');
     document.getElementById('screen2').classList.remove('hidden');
+    document.querySelector('.add-btn').style.display = 'none';
   }
 
   function goBack() {
@@ -627,6 +633,7 @@
     document.getElementById('confirmBtn').classList.add('hidden');
     document.getElementById('screen2').classList.add('hidden');
     document.getElementById('screen1').classList.remove('hidden-left');
+    document.querySelector('.add-btn').style.display = '';
   }
 
   // Swipe left on screen1 to confirm
@@ -813,16 +820,30 @@
           if (animate) { line.style.opacity = '0'; line.style.transition = 'opacity ' + segDur + 's ease'; }
           svg.appendChild(line);
 
-          var midRad = ((sA + sweep / 2) * Math.PI) / 180;
+          var midDeg = sA + sweep / 2;
+          var midRad = (midDeg * Math.PI) / 180;
           var lr = r * 0.6;
           var lx = cx + lr * Math.cos(midRad);
           var ly = cy + lr * Math.sin(midRad);
+
+          // Radial text orientation (like feelings wheel)
+          // Text runs along the radius; flip if pointing downward so it stays readable
+          var textDeg = midDeg;
+          if (textDeg > 90 && textDeg < 270) textDeg += 180;
+          if (textDeg < -90 && textDeg > -270) textDeg += 180;
+          // Normalize negative angles from startAngle=-90
+          var normDeg = ((midDeg % 360) + 360) % 360;
+          textDeg = normDeg;
+          if (normDeg > 90 && normDeg < 270) textDeg = normDeg + 180;
 
           var text = document.createElementNS(ns, 'text');
           text.setAttribute('x', lx); text.setAttribute('y', ly);
           text.setAttribute('font-size', sweep > 30 ? '14' : '10');
           text.setAttribute('font-weight', '600');
           text.setAttribute('fill', currentTheme === 'dark' ? '#ffffff' : c.color);
+          text.setAttribute('text-anchor', 'middle');
+          text.setAttribute('dominant-baseline', 'central');
+          text.setAttribute('transform', 'rotate(' + textDeg + ',' + lx + ',' + ly + ')');
           text.textContent = name;
           if (animate) { text.style.opacity = '0'; text.style.transition = 'opacity 0.3s ease'; }
           svg.appendChild(text);
@@ -855,6 +876,7 @@
     renderPie(false);
     document.getElementById('screen1').classList.add('hidden-left');
     document.getElementById('screen2').classList.remove('hidden');
+    document.querySelector('.add-btn').style.display = 'none';
   }
 </script>
 
