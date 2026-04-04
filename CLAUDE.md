@@ -1,145 +1,73 @@
-# habit.io — Claude Instructions
+# kONtakt — Claude Instructions
 
 ## Project Overview
 
-**habit.io** is an offline-first PWA habit tracker. Single-page app with no build step.
+**kONtakt** is an evening emotional ritual PWA for families. Single-page app, single HTML file, no build step.
 
-**Live app:** https://habitio.rafal-sladek.com/ (mirror: https://rafalsladek.github.io/habitio/)
-**Repo:** https://github.com/RafalSladek/habitio
+**Live app:** https://kontakt.rafal-sladek.com/ (mirror: https://rafalsladek.github.io/kONtakt/)
+**Repo:** https://github.com/RafalSladek/kONtakt
 **Deployed via:** GitHub Pages from `main` branch, root `/`
+**Custom domain:** `kontakt.rafal-sladek.com` via Cloudflare DNS → CNAME file in repo
 
 ## Architecture
 
-Files are split for clarity; no build step required:
+Single-file app — all HTML, CSS, and JS live in `index.html`:
 
 | File | Purpose |
 |---|---|
-| `index.html` | App shell and markup (~240 lines) |
-| `styles.css` | All styles |
-| `i18n.js` | All translations (`T` object, 12 languages) + `t()`, `DN()`, `MN()` helpers |
-| `app.js` | All application logic (~1 800 lines) |
-| `suggestions.js` | Habit suggestion data with demographic scoring |
-| `sw.js` | Service worker — full offline caching (cache name: `habitio_v7`) |
-| `manifest.json` | PWA manifest |
-| `icons/` | Favicon, app icons (16, 32, 192, 512px + SVG), hero-onboarding.webp/png |
+| `index.html` | Entire app — markup, styles, and logic |
+| `CNAME` | Custom domain for GitHub Pages |
+| `icons/` | Favicon + app icons (16, 32, 180, 192, 512px + SVG flower of emotions) |
+| `scripts/screenshots.js` | Automated screenshots (iPhone SE/14, Pixel 5, Desktop) |
+| `scripts/gif.js` | User journey GIF generator (requires ffmpeg) |
+| `docs/screenshots/` | Generated screenshots and user-journey.gif |
+| `docs/research/` | Reference materials (Feelings Wheel image) |
+
+## Screens
+
+- **Screen 1** — Emotion wheel: 7 core emotions from the Feelings Wheel (Dr. Gloria Willcox) arranged in a circle, with toggle to flower layout. Users can add custom emotions.
+- **Screen 2** — Pie chart: shows last 7 entries as a pie chart with emotion colors.
 
 ## Data Storage
 
 All user data is stored **client-side only**:
 
-- API: `localStorage`
-- Key: `habitio_v7`
-- Format: JSON-serialized state object: `{ habits[], checks{}, diary{}, profile{name,age,ageGroup,sex}, lang, kitsDismissed{}, consentAnalytics }`
+- `panigosia_entries` — JSON array of `{date, emotions[]}` entries
+- `panigosia_custom` — JSON array of custom emotion names
+- `panigosia_theme` — `"pastel"` (default) or `"dark"`
+- `panigosia_last_vote` — date string of last vote (shows pie chart on revisit)
 - No backend, no sync, no accounts
-
-Export/import via JSON file is the only cross-device migration path. Do not introduce a backend unless explicitly requested.
 
 ## Key Implementation Details
 
-- **Habit IDs**: `crypto.randomUUID()` via `uid()` function (with fallback)
-- **Age groups**: `AGE_GROUPS = [{key,age}]` — stores both `profile.ageGroup` (key) and `profile.age` (representative int) for backward compat with `getSuggestions()` which uses `parseInt(profile.age)`
-- **Date formatting**: `fmt(d)` uses `toISOString().slice(0,10)` (UTC-based)
-- **i18n**: `T` object in `i18n.js` with `en`/`de`/`pl`/`pt`/`ru`/`fr`/`hi`/`uk`/`ar`/`sq`/`sr`/`bar` keys; `t(key)` helper; language stored in `state.lang`
-- **Sex options**: `profile.sex` can be `"male"`, `"female"`, or `"prefer"` (prefer not to say)
-- **Formation arc**: 66-day science-backed journey shown as phase emoji per habit
-- **Morning routine**: habits tagged `morning:true` grouped at top
-- **Analytics (privacy-first)**: GA4 script is **not** loaded in `index.html`. It is lazy-loaded from `app.js` only after the user grants consent. GTM has been removed entirely. Key functions: `ensureAnalyticsBootstrap()`, `loadAnalyticsScript()`, `applyAnalyticsConsent()`, `clearAnalyticsCookies()`, `queueAnalyticsCall()`, `trackEvent()`, `trackPageView()`, `updateUserProperties()`. Consent stored in `state.consentAnalytics` (null/true/false).
-
-## CI / CD
-
-GitHub Actions (`.github/workflows/ci.yml`):
-- `test` job: Playwright e2e tests (Desktop Chrome + Pixel 5 mobile + iPad tablet)
-- `sonar` job: SonarCloud quality gate (needs: test)
-- `deploy` job: deploys to GitHub Pages only if `test` + `sonar` pass
-- `deploy-worker` job: deploys `worker/feedback.js` to Cloudflare Workers (needs: test, main only); requires `CLOUDFLARE_API_TOKEN` secret in GitHub repo settings
-- `pagespeed` job: Lighthouse CI after deploy (budget: `.github/lighthouse-budget.json`)
-- `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` env set workflow-wide (avoids Node 20 deprecation warnings)
-
-### Cloudflare Worker — Feedback Backend
-
-- **Source**: `worker/feedback.js` + `worker/wrangler.toml`
-- **Live URL**: `https://habitio-feedback.kryptoroger.workers.dev`
-- **Secret**: `GITHUB_TOKEN` stored in Cloudflare (fine-grained PAT, Issues: Read & Write on this repo only)
-- **No cache** — stateless compute, no invalidation needed after deploy
-- **Manual deploy**: `cd worker && npx wrangler deploy`
-- **Set/rotate token**: `cd worker && npx wrangler secret put GITHUB_TOKEN`
-- **GitHub secret required**: add `CLOUDFLARE_API_TOKEN` (Cloudflare dashboard → My Profile → API Tokens → create token with *Cloudflare Workers Scripts: Edit* permission) to repo secrets for CI auto-deploy
-
-## Performance / Accessibility Notes
-
-- Google Fonts loaded **non-blocking** (preconnect + preload with `onload` swap) — do not revert to blocking `<link rel="stylesheet">`
-- Hero image uses `<picture>` with WebP source + PNG fallback; WebP generated via `ffmpeg`
-- `--text-muted` CSS var must stay at `#7878a0` or lighter (contrast 5.3:1 vs dark bg) — do not go darker
-- No `user-scalable=no` in viewport — do not add it back
+- **7 core emotions**: radosc, smutek, wstret, zlosc, strach, dyskomfort, zaskoczenie
+- **Colors**: based on original Feelings Wheel — Happy=#F0D860, Sad=#6B9DC8, Disgusted=#7AB48C, Angry=#E88878, Fearful=#A8C878, Bad=#8BA0C0, Surprised=#C8A0D0
+- **Two palettes**: dark (rgba 0.28 opacity bg, light text) and pastel (rgba 0.45 opacity bg, dark text). Default is pastel.
+- **Two layouts**: circle (equal circles on a ring) and flower (identical oval petals rotated toward center, horizontal counter-rotated text)
+- **Circle layout geometry**: `R = (D + gap) / (2 * sin(PI/N))` ensures no overlap
+- **Flower layout**: all petals have identical dimensions (arcW x petalLen), each rotated by its angle + 90deg, text counter-rotated to stay horizontal
+- **Layout animation**: CSS transitions (0.9s ease) on position, size, and transform — DOM elements persist, only styles change
+- **Adding custom emotion**: element appended at center with zero size, then `applyPositions()` triggers animated reflow
+- **Emotions shuffled**: `renderWheel()` shuffles baseEmotions on each render
+- **Date**: `today()` returns `YYYY-MM-DD` via `toISOString().slice(0,10)`
 
 ## Development Notes
 
-- No build tooling — edit files directly, changes are immediately deployable
-- Deploy by pushing to `main` (GitHub Pages auto-builds from GitHub Actions)
+- No build tooling — edit `index.html` directly, changes are immediately deployable
+- Deploy by pushing to `main` (GitHub Pages auto-builds)
 - Do not use `git push --force` on main
-- To run tests locally: `yarn test` (starts local server via `npx serve`)
-- To convert images to WebP: `ffmpeg -i input.png -c:v libwebp -quality 82 output.webp`
+- Google Fonts loaded non-blocking (preconnect + preload)
+- No `user-scalable=no` in viewport
 
-## Service Worker & Caching
+## Scripts
 
-The SW uses **stale-while-revalidate** for all same-origin app shell files (`app.js`, `styles.css`, `index.html`, etc.):
-- Cache is served immediately (fast, works offline)
-- Network fetch always runs in background to refresh the cache
-- Result: users see the new version on the **next** page load after a deploy (one reload lag)
-
-**SW cache name must always match the localStorage key** (`CACHE` in `sw.js` = `habitio_v7`).
-- When the localStorage key is bumped (e.g. `habitio_v7` → `habitio_v8`), update `CACHE` in `sw.js` to the same value
-- This keeps a single version number across both systems — one bump covers both the data schema migration and the asset cache bust
-- Without bumping, users who haven't visited since the last SW version change will keep getting old cached files
-
-**Why not instant updates?**
-GitHub Pages sets `Cache-Control: max-age=600` (10 min) — nothing can be done about that.
-Without asset fingerprinting (e.g. `app.a1b2c3.js`) there is no way to achieve zero-reload updates. One reload is the best achievable without a build tool.
-
-## Data Migration
-
-When bumping the localStorage version key (e.g. `habitio_v7` → `habitio_v8`), always implement a migration layer in `app.js` that:
-1. Reads any older version keys on startup
-2. Migrates the data shape to the new format
-3. Saves under the new key and deletes the old one
-
-Never change the storage key without migration — users must not lose their habits, checks, diary entries, or profile.
-
-## Code Quality — Non-Negotiable
-
-**Quality is not optional. All generated code MUST pass SonarCloud before pushing.**
-
-1. **Verify with sonar-scanner** — run `sonar-scanner` after every code change. The `SONAR_TOKEN` will be exported in the session.
-2. **Check the Quality Gate** — after scanning, use the SonarQube MCP tools to check the Quality Gate status, or read the scanner output directly.
-3. **Fix all issues immediately** — if SonarCloud reports bugs or code smells, fix them and re-scan. Do NOT push until issues are resolved.
-4. **Low coverage = blocking** — if a failed Quality Gate is caused by insufficient test coverage, generate the required unit/e2e tests. This is a blocking issue.
-5. **Only recommend pushing when the Quality Gate PASSES.**
-6. **New files → SonarCloud exclusion check** — for every new file added, decide whether it should be scanned or excluded. Check `sonar-project.properties` and add the file/pattern to `sonar.exclusions` if it is: a script (`scripts/**`), test fixture, generated output, tooling config, docs asset, or any file that is not application source code. Application source files (`app.js`, `styles.css`, `i18n.js`, `index.html`, etc.) must remain included.
+- `node scripts/screenshots.js` — take screenshots for all devices (seeds localStorage with sample entries)
+- `node scripts/screenshots.js --device iphonese` — single device
+- `node scripts/gif.js` — generate user-journey.gif (requires ffmpeg)
+- `node scripts/gif.js --device desktop --fps 4` — custom options
 
 ## Pre-Commit Checklist
 
-**Always do all of these before committing:**
-
-1. **Format code**: `yarn format` — run Prettier on all source files before committing. Use `yarn format:check` to verify without writing.
-2. **Run tests**: `yarn test` — all projects (Desktop, Mobile, Tablet) must pass
-3. **Update screenshots**: if any UI change was made (layout, colours, new screens, copy), retake **all** affected screenshots in `docs/` using Playwright and include them in the same commit. Canonical set:
-   - Mobile 393×852: `screenshot-onboarding.png`, `screenshot-tracker.png`, `screenshot-add-habit.png`, `screenshot-journal.png`, `screenshot-journal-summary.png`, `screenshot-stats.png`, `screenshot-settings.png`
-   - Desktop 1280×800: `desktop-preview.png`, `desktop-stats.png`, `desktop-journal.png`, `desktop-settings.png`, `desktop-modal.png`
-   - Tablet: `tablet-preview.png`
-4. **Visual screenshot review**: after retaking screenshots, **read each affected image** using the Read tool and visually verify:
-   - Overlays (modals, consent banner, FAB) are correctly positioned and not bleeding outside their intended area
-   - Desktop layout: consent banner is centered in the content column (not full-width, not left-aligned); sidebar nav items are compact (not stretched); modal does not show FAB behind it
-   - Mobile layout: modal covers full width; FAB is hidden when modal is open
-   - No unexpected elements visible (e.g. glow from hidden components, z-index leaks)
-   Fix any issues found before proceeding to commit.
-5. **Check PageSpeed**: download the latest Lighthouse artifact from the most recent CI run (`gh run download <run-id> --name lighthouse-results --dir /tmp/lh-results`) and verify no new audit regressions before committing
-6. **Bump version key**: if `app.js`, `styles.css`, `suggestions.js`, `i18n.js`, or `index.html` changed, increment the version in **three places** to keep them in sync:
-   - `localStorage` key in `save()` and `load()` in `app.js` (e.g. `habitio_v7` → `habitio_v8`)
-   - `CACHE` in `sw.js` (same value)
-   - `APP_VERSION` in `app.js` — follows `v2.<schema>` format, so `"v2.7"` → `"v2.8"`
-   - Add a migration read in `load()` for the old key
-   - The minor version always equals the data schema number (e.g. storage `v8` → display `v2.8`)
-7. **New files → SonarCloud exclusion check**: for every new file added in this commit, verify whether it belongs in `sonar.exclusions` in `sonar-project.properties`. Scripts, fixtures, generated output, tooling configs, and docs assets must be excluded; application source files must not be.
-8. **Amend vs new commit**: if the staged changes are a direct fix or addendum to the immediately preceding commit (e.g. a format pass, a forgotten file, a typo fix), amend that commit instead of creating a new one — `git commit --amend`. Create a new commit when the change has independent meaning or the previous commit is already pushed and shared.
-9. **Update `TODO.md`**: add any new tasks completed in this session to `TODO.md` and include it in the same commit as the code changes
-10. **Update docs**: if the architecture, file list, i18n languages, or any dev instructions changed, update `CLAUDE.md` and `README.md` in the same commit
+1. **Update screenshots**: if any UI change, run `node scripts/screenshots.js` and `node scripts/gif.js`
+2. **Visual review**: read screenshots with Read tool, verify layout correctness
+3. **Update docs**: if architecture or features changed, update `CLAUDE.md` and `README.md`

@@ -465,20 +465,12 @@
       arcW = Math.max(36, Math.min(arcW, petalLen * 0.6));
       var fontSize = Math.max(0.6, 0.78 * arcW / 60);
 
-      // Each petal gets unique proportions for organic variety
-      var petalVariations = [0.85, 1.0, 0.9, 1.1, 0.95, 1.05, 0.88, 0.97, 1.08, 0.92, 1.02];
-      var widthVariations = [1.0, 0.85, 1.1, 0.9, 1.05, 0.88, 0.95, 1.08, 0.92, 1.0, 0.87];
       emoElements.forEach(function(el, i) {
         var angle = (2 * Math.PI * i / count) - Math.PI / 2;
-        var hScale = petalVariations[i % petalVariations.length];
-        var wScale = widthVariations[i % widthVariations.length];
-        var pw = Math.round(arcW * wScale);
-        var ph = Math.round(petalLen * hScale);
-        var dist = midR + (petalLen * (hScale - 1) * 0.5);
-        var x = cx + dist * Math.cos(angle);
-        var y = cy + dist * Math.sin(angle);
-        el.style.width = pw + 'px';
-        el.style.height = ph + 'px';
+        var x = cx + midR * Math.cos(angle);
+        var y = cy + midR * Math.sin(angle);
+        el.style.width = arcW + 'px';
+        el.style.height = Math.round(petalLen) + 'px';
         el.style.left = x + 'px';
         el.style.top = y + 'px';
         el.style.fontSize = fontSize + 'rem';
