@@ -136,14 +136,13 @@
   }
 
   .back-btn {
-    margin: 8px auto 16px;
-    background: rgba(255,255,255,0.06);
-    color: #777799;
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 8px 28px; border-radius: 20px;
-    font-size: 0.8rem; cursor: pointer;
+    position: fixed; top: 16px; left: 16px; z-index: 60;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+    color: #aaa; border-radius: 20px; padding: 8px 16px;
+    font-size: 0.85rem; cursor: pointer; font-family: inherit;
+    transition: all 0.3s ease;
   }
-  .back-btn:hover { background: rgba(255,255,255,0.1); color: #d0d0f0; }
+  .back-btn:hover { background: rgba(255,255,255,0.18); }
 
   .modal-overlay {
     position: fixed; inset: 0;
@@ -211,10 +210,9 @@
   body.pastel .add-btn:hover { color: #a78bdb; }
   body.pastel .pie-period { color: #9a8fad; }
   body.pastel .back-btn {
-    background: rgba(0,0,0,0.04); color: #9a8fad;
-    border-color: rgba(0,0,0,0.08);
+    background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.1); color: #7a7a9a;
   }
-  body.pastel .back-btn:hover { background: rgba(0,0,0,0.07); color: #5a5a7a; }
+  body.pastel .back-btn:hover { background: rgba(0,0,0,0.1); }
   body.pastel .emo.selected {
     border-color: rgba(0,0,0,0.25);
     box-shadow: 0 0 20px rgba(0,0,0,0.08);
