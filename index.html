@@ -779,151 +779,121 @@
       return;
     }
 
-    // Draw all segments immediately, text separately
+    // Spiral unwind: segments grow from center one by one
     var startAngle = -90;
-    var textEls = [];
-
+    var segData = [];
     for (var i = 0; i < sorted.length; i++) {
       var name = sorted[i][0];
       var count = sorted[i][1];
       var sweep = (count / total) * 360;
-      var endAngle = startAngle + sweep;
       var c = colorMap[name] || { bg: 'rgba(200,200,200,0.3)', color: '#ccc' };
       var pieBg = c.bg.replace(/,\s*[\d.]+\)$/, currentTheme === 'dark' ? ',0.55)' : ',0.7)');
+      segData.push({ name: name, start: startAngle, sweep: sweep, bg: pieBg, color: c.color });
+      startAngle += sweep;
+    }
 
-      var startRad = (startAngle * Math.PI) / 180;
-      var endRad = (endAngle * Math.PI) / 180;
-      var x1 = cx + r * Math.cos(startRad);
-      var y1 = cy + r * Math.sin(startRad);
-      var x2 = cx + r * Math.cos(endRad);
-      var y2 = cy + r * Math.sin(endRad);
-      var largeArc = sweep > 180 ? 1 : 0;
+    function arcPath(sA, sw, rad) {
+      var sRad = sA * Math.PI / 180;
+      var eRad = (sA + sw) * Math.PI / 180;
+      var x1 = cx + rad * Math.cos(sRad), y1 = cy + rad * Math.sin(sRad);
+      var x2 = cx + rad * Math.cos(eRad), y2 = cy + rad * Math.sin(eRad);
+      var la = sw > 180 ? 1 : 0;
+      return 'M'+cx+','+cy+' L'+x1+','+y1+' A'+rad+','+rad+' 0 '+la+',1 '+x2+','+y2+' Z';
+    }
 
-      var path = document.createElementNS(ns, 'path');
-      path.setAttribute('d', 'M' + cx + ',' + cy + ' L' + x1 + ',' + y1 + ' A' + r + ',' + r + ' 0 ' + largeArc + ',1 ' + x2 + ',' + y2 + ' Z');
-      path.setAttribute('fill', pieBg);
-      svg.appendChild(path);
-
-      var line = document.createElementNS(ns, 'line');
-      line.setAttribute('x1', cx); line.setAttribute('y1', cy);
-      line.setAttribute('x2', x1); line.setAttribute('y2', y1);
-      line.setAttribute('stroke', 'rgba(255,255,255,0.08)');
-      line.setAttribute('stroke-width', '0.5');
-      svg.appendChild(line);
-
-      // Radial text
-      var midDeg = startAngle + sweep / 2;
-      var midRad = (midDeg * Math.PI) / 180;
+    function addRadialText(parent, seg, opacity) {
+      var midDeg = seg.start + seg.sweep / 2;
+      var midRad = midDeg * Math.PI / 180;
       var lr = r * 0.6;
       var lx = cx + lr * Math.cos(midRad);
       var ly = cy + lr * Math.sin(midRad);
       var normDeg = ((midDeg % 360) + 360) % 360;
       var textDeg = normDeg;
       if (normDeg > 90 && normDeg < 270) textDeg = normDeg + 180;
-
       var text = document.createElementNS(ns, 'text');
       text.setAttribute('x', lx); text.setAttribute('y', ly);
-      text.setAttribute('font-size', sweep > 30 ? '14' : '10');
+      text.setAttribute('font-size', seg.sweep > 30 ? '14' : '10');
       text.setAttribute('font-weight', '600');
-      text.setAttribute('fill', currentTheme === 'dark' ? '#ffffff' : c.color);
+      text.setAttribute('fill', currentTheme === 'dark' ? '#ffffff' : seg.color);
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('dominant-baseline', 'central');
       text.setAttribute('transform', 'rotate(' + textDeg + ',' + lx + ',' + ly + ')');
-      text.textContent = name;
-      text.style.opacity = animate ? '0' : '1';
-      text.dataset.showAt = String(endAngle); // reveal when sweep passes this angle
-      svg.appendChild(text);
-      textEls.push(text);
-
-      startAngle = endAngle;
+      text.textContent = seg.name;
+      text.style.opacity = opacity;
+      parent.appendChild(text);
+      return text;
     }
 
-    // Radar sweep animation: clip-path reveals pie clockwise from 12 o'clock
-    if (animate) {
-      var clipId = 'radarClip' + Date.now();
-      var defs = document.createElementNS(ns, 'defs');
-      var clipPath = document.createElementNS(ns, 'clipPath');
-      clipPath.setAttribute('id', clipId);
-      var sweepPath = document.createElementNS(ns, 'path');
-      clipPath.appendChild(sweepPath);
-      defs.appendChild(clipPath);
-      svg.insertBefore(defs, svg.firstChild);
-
-      // Wrap all pie content (except defs) in a group with clip-path
-      var g = document.createElementNS(ns, 'g');
-      g.setAttribute('clip-path', 'url(#' + clipId + ')');
-      var children = [];
-      for (var k = 0; k < svg.childNodes.length; k++) {
-        if (svg.childNodes[k] !== defs) children.push(svg.childNodes[k]);
+    if (!animate) {
+      // Static draw
+      for (var i = 0; i < segData.length; i++) {
+        var seg = segData[i];
+        var path = document.createElementNS(ns, 'path');
+        path.setAttribute('d', arcPath(seg.start, seg.sweep, r));
+        path.setAttribute('fill', seg.bg);
+        svg.appendChild(path);
+        var sRad = seg.start * Math.PI / 180;
+        var line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+        line.setAttribute('x2', cx + r * Math.cos(sRad)); line.setAttribute('y2', cy + r * Math.sin(sRad));
+        line.setAttribute('stroke', 'rgba(255,255,255,0.08)'); line.setAttribute('stroke-width', '0.5');
+        svg.appendChild(line);
+        addRadialText(svg, seg, '1');
       }
-      for (var k = 0; k < children.length; k++) g.appendChild(children[k]);
-      svg.appendChild(g);
+    } else {
+      // Animated: each segment grows from r=0 to r=125, staggered
+      var segDelay = 150;
+      var segDur = 500;
 
-      // Animate sweep from 0 to 360 degrees
-      var sweepDuration = 1200; // ms
-      var sweepStart = null;
-      var big = r + 10; // slightly larger than pie radius
+      for (var i = 0; i < segData.length; i++) {
+        (function(idx) {
+          var seg = segData[idx];
 
-      function buildSweepPath(angleDeg) {
-        // Builds a pie-slice shape from -90deg sweeping angleDeg clockwise
-        if (angleDeg <= 0) return 'M0,0Z';
-        if (angleDeg >= 360) return 'M0,0 L' + (cx*3) + ',0 L' + (cx*3) + ',' + (cy*3) + ' L0,' + (cy*3) + 'Z';
-        var a = angleDeg;
-        var pts = [cx + ',' + cy, cx + ',' + (cy - big)];
-        // Add arc points at 90deg intervals that are within the sweep
-        var corners = [
-          [cx + big, cy - big],  // top-right at 0-90
-          [cx + big, cy + big],  // bottom-right at 90-180
-          [cx - big, cy + big],  // bottom-left at 180-270
-          [cx - big, cy - big],  // top-left at 270-360
-        ];
-        var thresholds = [90, 180, 270, 360];
-        for (var q = 0; q < 4; q++) {
-          if (a > thresholds[q]) {
-            pts.push(corners[q][0] + ',' + corners[q][1]);
-          }
-        }
-        // End point on the arc
-        var endRad = ((a - 90) * Math.PI) / 180;
-        var ex = cx + big * Math.cos(endRad);
-        var ey = cy + big * Math.sin(endRad);
-        pts.push(ex + ',' + ey);
-        return 'M' + pts.join(' L') + ' Z';
+          setTimeout(function() {
+            var startTs = null;
+            var g = document.createElementNS(ns, 'g');
+            g.setAttribute('data-seg', idx);
+            svg.appendChild(g);
+
+            function step(ts) {
+              if (!startTs) startTs = ts;
+              var p = Math.min((ts - startTs) / segDur, 1);
+              // Ease out cubic
+              var eased = 1 - Math.pow(1 - p, 3);
+              var currentR = r * eased;
+
+              // Rebuild path at current radius
+              while (g.firstChild) g.removeChild(g.firstChild);
+              var path = document.createElementNS(ns, 'path');
+              path.setAttribute('d', arcPath(seg.start, seg.sweep, currentR));
+              path.setAttribute('fill', seg.bg);
+              path.style.opacity = String(Math.min(p * 2, 1));
+              g.appendChild(path);
+
+              if (p < 1) {
+                requestAnimationFrame(step);
+              } else {
+                // Final: full segment + divider + text
+                while (g.firstChild) g.removeChild(g.firstChild);
+                var finalPath = document.createElementNS(ns, 'path');
+                finalPath.setAttribute('d', arcPath(seg.start, seg.sweep, r));
+                finalPath.setAttribute('fill', seg.bg);
+                g.appendChild(finalPath);
+                var sRad = seg.start * Math.PI / 180;
+                var line = document.createElementNS(ns, 'line');
+                line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+                line.setAttribute('x2', cx + r * Math.cos(sRad)); line.setAttribute('y2', cy + r * Math.sin(sRad));
+                line.setAttribute('stroke', 'rgba(255,255,255,0.08)'); line.setAttribute('stroke-width', '0.5');
+                g.appendChild(line);
+                var t = addRadialText(g, seg, '0');
+                t.style.transition = 'opacity 0.3s ease';
+                requestAnimationFrame(function() { t.style.opacity = '1'; });
+              }
+            }
+            requestAnimationFrame(step);
+          }, idx * segDelay);
+        })(i);
       }
-
-      function animateSweep(timestamp) {
-        if (!sweepStart) sweepStart = timestamp;
-        var elapsed = timestamp - sweepStart;
-        var progress = Math.min(elapsed / sweepDuration, 1);
-        // Ease out cubic for smooth deceleration
-        var eased = 1 - Math.pow(1 - progress, 3);
-        var currentAngle = eased * 360;
-
-        sweepPath.setAttribute('d', buildSweepPath(currentAngle));
-
-        // Reveal text labels when sweep passes their segment end
-        var currentSweepDeg = -90 + currentAngle;
-        for (var t = 0; t < textEls.length; t++) {
-          var showAt = parseFloat(textEls[t].dataset.showAt);
-          if (currentSweepDeg >= showAt && textEls[t].style.opacity === '0') {
-            textEls[t].style.transition = 'opacity 0.3s ease';
-            textEls[t].style.opacity = '1';
-          }
-        }
-
-        if (progress < 1) {
-          requestAnimationFrame(animateSweep);
-        } else {
-          // Remove clip-path after animation completes
-          g.removeAttribute('clip-path');
-          if (defs.parentNode) defs.parentNode.removeChild(defs);
-          // Move children back out of group
-          while (g.firstChild) svg.appendChild(g.firstChild);
-          if (g.parentNode) g.parentNode.removeChild(g);
-        }
-      }
-
-      requestAnimationFrame(animateSweep);
     }
   }
 
