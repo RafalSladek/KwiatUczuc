@@ -648,10 +648,12 @@
       var y2 = cy + r * Math.sin(endRad);
       var largeArc = sweep > 180 ? 1 : 0;
       var c = colorMap[name] || { bg: 'rgba(200,200,200,0.3)', color: '#ccc' };
+      // Boost pie segment opacity for better contrast
+      var pieBg = c.bg.replace(/,\s*[\d.]+\)$/, currentTheme === 'dark' ? ',0.55)' : ',0.7)');
 
       var path = document.createElementNS(ns, 'path');
       path.setAttribute('d', 'M' + cx + ',' + cy + ' L' + x1 + ',' + y1 + ' A' + r + ',' + r + ' 0 ' + largeArc + ',1 ' + x2 + ',' + y2 + ' Z');
-      path.setAttribute('fill', c.bg);
+      path.setAttribute('fill', pieBg);
       svg.appendChild(path);
 
       var line = document.createElementNS(ns, 'line');
@@ -671,8 +673,9 @@
       var text = document.createElementNS(ns, 'text');
       text.setAttribute('x', lx);
       text.setAttribute('y', ly);
-      text.setAttribute('font-size', sweep > 30 ? '12' : '9');
-      text.setAttribute('fill', c.color);
+      text.setAttribute('font-size', sweep > 30 ? '14' : '10');
+      text.setAttribute('font-weight', '600');
+      text.setAttribute('fill', currentTheme === 'dark' ? '#ffffff' : c.color);
       text.textContent = name;
       svg.appendChild(text);
 
