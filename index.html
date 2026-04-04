@@ -135,12 +135,15 @@
   .emo.petal {
     border-radius: 50%;
     width: var(--petal-w, 60px); height: var(--petal-h, 90px);
-    border-radius: 50%;
     transform: translate(-50%, -50%) rotate(var(--petal-rot, 0deg));
   }
   .emo.petal:hover { transform: translate(-50%, -50%) rotate(var(--petal-rot, 0deg)) scale(1.1); }
   .emo.petal:active { transform: translate(-50%, -50%) rotate(var(--petal-rot, 0deg)) scale(0.95); }
   .emo.petal.selected { transform: translate(-50%, -50%) rotate(var(--petal-rot, 0deg)) scale(1.08); }
+  .petal-text {
+    display: block;
+    transform: rotate(calc(-1 * var(--petal-rot, 0deg)));
+  }
 
   .layout-toggle {
     text-align: center; margin-top: 12px; cursor: pointer; padding: 6px;
@@ -439,11 +442,11 @@
       var maxW = window.innerWidth - 40;
       var maxH = window.innerHeight * 0.55;
       var maxDim = Math.min(maxW, maxH);
-      var petalH = Math.min(Math.round(maxDim * 0.38), 110);
-      var petalW = Math.round(petalH * 0.55);
-      var petalOffset = Math.round(petalH * 0.35);
-      var size = (petalH + petalOffset) * 2 + 16;
-      var fontSize = Math.max(0.6, 0.8 * petalW / 60);
+      var petalH = Math.min(Math.round(maxDim * 0.4), 120);
+      var petalW = Math.round(petalH * 0.52);
+      var petalOffset = Math.round(petalH * 0.55);
+      var size = (petalH + petalOffset) * 2 + 20;
+      var fontSize = Math.max(0.6, 0.78 * petalW / 60);
 
       circle.style.width = size + 'px';
       circle.style.height = size + 'px';
@@ -459,7 +462,10 @@
         var el = document.createElement('div');
         el.className = 'emo petal';
         el.dataset.name = emo.name;
-        el.textContent = emo.name;
+        var span = document.createElement('span');
+        span.className = 'petal-text';
+        span.textContent = emo.name;
+        el.appendChild(span);
         el.style.background = emo.bg;
         el.style.color = emo.color;
         el.style.fontSize = fontSize + 'rem';
