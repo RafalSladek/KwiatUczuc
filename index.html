@@ -81,22 +81,40 @@
 
   .emo {
     position: absolute;
-    border-radius: 26px;
-    white-space: nowrap;
+    border-radius: 50%;
+    width: var(--emo-size, 80px); height: var(--emo-size, 80px);
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
     cursor: pointer;
     transition: all 0.25s ease;
-    border: 1.5px solid transparent;
-    font-weight: 400;
+    border: 2px solid transparent;
+    font-weight: 500;
     user-select: none;
     transform: translate(-50%, -50%);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    animation: breathe 3s ease-in-out infinite;
+    animation-delay: var(--breathe-delay, 0s);
   }
 
-  .emo:hover { transform: translate(-50%, -50%) scale(1.1); }
+  @keyframes breathe {
+    0%, 100% { box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    50% { box-shadow: 0 6px 25px rgba(0,0,0,0.3); }
+  }
+
+  .emo:hover { transform: translate(-50%, -50%) scale(1.12); }
+  .emo:active { transform: translate(-50%, -50%) scale(0.95); }
 
   .emo.selected {
-    border-color: rgba(255,255,255,0.5);
-    box-shadow: 0 0 20px rgba(255,255,255,0.15);
-    transform: translate(-50%, -50%) scale(1.08);
+    border-color: rgba(255,255,255,0.6);
+    box-shadow: 0 0 25px rgba(255,255,255,0.2);
+    transform: translate(-50%, -50%) scale(1.1);
+    animation: none;
+  }
+
+  body.pastel .emo { box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+  body.pastel .emo.selected {
+    border-color: rgba(0,0,0,0.2);
+    box-shadow: 0 0 25px rgba(0,0,0,0.12);
   }
 
   .add-btn {
@@ -355,10 +373,9 @@
     var scale = getScaleFactor(count);
     var baseRadius = Math.min(window.innerWidth * 0.38, 180);
     var radius = baseRadius * scale;
-    var size = (radius + 30) * 2;
-    var pillFontSize = Math.max(0.8, 1.1 * scale);
-    var pillPadY = Math.max(8, Math.round(12 * scale));
-    var pillPadX = Math.max(16, Math.round(24 * scale));
+    var emoSize = Math.max(56, Math.round(84 * scale));
+    var size = (radius + emoSize / 2 + 8) * 2;
+    var fontSize = Math.max(0.7, 0.9 * scale);
 
     circle.style.width = size + 'px';
     circle.style.height = size + 'px';
@@ -377,8 +394,9 @@
       el.textContent = emo.name;
       el.style.background = emo.bg;
       el.style.color = emo.color;
-      el.style.fontSize = pillFontSize + 'rem';
-      el.style.padding = pillPadY + 'px ' + pillPadX + 'px';
+      el.style.fontSize = fontSize + 'rem';
+      el.style.setProperty('--emo-size', emoSize + 'px');
+      el.style.setProperty('--breathe-delay', (i * 0.5) + 's');
       el.style.left = x + 'px';
       el.style.top = y + 'px';
       el.onclick = function() { selectEmo(el); };
