@@ -343,11 +343,23 @@
 
   applyTheme();
 
-  function getScaleFactor(count) {
-    if (count <= 7) return 1;
-    if (count <= 9) return 0.85;
-    if (count <= 11) return 0.72;
-    return 0.6;
+  function computeLayout(count) {
+    var maxW = window.innerWidth - 40;
+    var maxH = window.innerHeight * 0.55;
+    var maxDim = Math.min(maxW, maxH);
+    var gap = 10;
+    var sinVal = Math.sin(Math.PI / count);
+    var emoSize = Math.round(78 * Math.min(1, 7 / count));
+    emoSize = Math.max(44, emoSize);
+    var rMin = (emoSize + gap) / (2 * sinVal);
+    var rMax = (maxDim - emoSize) / 2 - 4;
+    if (rMin > rMax) {
+      emoSize = Math.round((2 * sinVal * (rMax + 4) * 2 + 2 * sinVal * (-gap)) / (1 + 2 * sinVal));
+      emoSize = Math.max(40, Math.min(emoSize, 78));
+      rMin = (emoSize + gap) / (2 * sinVal);
+    }
+    var radius = Math.min(rMin, rMax);
+    return { emoSize: emoSize, radius: radius, fontSize: Math.max(0.65, 0.85 * emoSize / 78) };
   }
 
   function renderWheel() {
@@ -367,15 +379,11 @@
     });
 
     var count = allEmotions.length;
-    var scale = getScaleFactor(count);
-    var maxW = window.innerWidth - 40;
-    var maxH = window.innerHeight * 0.55;
-    var emoSize = Math.max(52, Math.round(78 * scale));
-    var maxRadius = (Math.min(maxW, maxH) - emoSize) / 2;
-    var baseRadius = Math.min(window.innerWidth * 0.3, 160);
-    var radius = Math.min(baseRadius * scale, maxRadius);
+    var layout = computeLayout(count);
+    var emoSize = layout.emoSize;
+    var radius = layout.radius;
+    var fontSize = layout.fontSize;
     var size = (radius + emoSize / 2 + 4) * 2;
-    var fontSize = Math.max(0.7, 0.9 * scale);
 
     circle.style.width = size + 'px';
     circle.style.height = size + 'px';
