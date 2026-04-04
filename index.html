@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>kONtakt — Włącz się na siebie</title>
+<meta property="og:title" content="kONtakt — Włącz się na siebie">
+<meta property="og:description" content="Emocje, potrzeby, wewnętrzne spełnienie. Wieczorny rytuał emocjonalny dla rodzin.">
+<meta property="og:image" content="https://rafalsladek.github.io/kONtakt/icons/icon-512.png">
+<meta property="og:type" content="website">
+<meta name="description" content="kONtakt — wieczorny rytuał emocjonalny dla rodzin. Rozpoznawaj i nazywaj swoje stany emocjonalne.">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -123,8 +132,26 @@
     box-shadow: 0 0 25px rgba(0,0,0,0.12);
   }
 
+  .emo.petal {
+    border-radius: 50%;
+    width: var(--petal-w, 60px); height: var(--petal-h, 90px);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) rotate(var(--petal-rot, 0deg));
+  }
+  .emo.petal:hover { transform: translate(-50%, -50%) rotate(var(--petal-rot, 0deg)) scale(1.1); }
+  .emo.petal:active { transform: translate(-50%, -50%) rotate(var(--petal-rot, 0deg)) scale(0.95); }
+  .emo.petal.selected { transform: translate(-50%, -50%) rotate(var(--petal-rot, 0deg)) scale(1.08); }
+
+  .layout-toggle {
+    text-align: center; margin-top: 12px; cursor: pointer; padding: 6px;
+  }
+  .layout-toggle img, .layout-toggle svg { width: 28px; height: 28px; opacity: 0.5; transition: opacity 0.3s; vertical-align: middle; }
+  .layout-toggle:hover img, .layout-toggle:hover svg { opacity: 0.8; }
+  .layout-toggle .toggle-label { font-size: 0.75rem; color: #7878a0; margin-left: 6px; vertical-align: middle; }
+  body.pastel .layout-toggle .toggle-label { color: #9a8fad; }
+
   .add-btn {
-    text-align: center; margin-top: 16px;
+    text-align: center; margin-top: 8px;
     font-size: 1rem; color: #ce93d8; cursor: pointer; padding: 8px;
   }
   .add-btn:hover { color: #e1bee7; }
@@ -260,6 +287,9 @@
     </div>
     <p class="screen-question">Jak się dziś czujesz?</p>
     <div class="emotion-circle" id="emotionCircle"></div>
+    <div class="layout-toggle" onclick="toggleLayout()">
+      <img src="icons/icon.svg" alt="kwiat"><span class="toggle-label" id="layoutLabel">kwiat emocji</span>
+    </div>
     <div class="add-btn" onclick="showModal()">+ dodaj własny stan</div>
   </div>
 
@@ -354,6 +384,20 @@
 
   applyTheme();
 
+  var currentLayout = localStorage.getItem('panigosia_layout') || 'circle';
+
+  function updateLayoutLabel() {
+    var label = document.getElementById('layoutLabel');
+    if (label) label.textContent = currentLayout === 'circle' ? 'kwiat emocji' : 'koło emocji';
+  }
+
+  function toggleLayout() {
+    currentLayout = currentLayout === 'circle' ? 'flower' : 'circle';
+    localStorage.setItem('panigosia_layout', currentLayout);
+    updateLayoutLabel();
+    renderWheel();
+  }
+
   function computeLayout(count) {
     var maxW = window.innerWidth - 40;
     var maxH = window.innerHeight * 0.55;
@@ -390,37 +434,78 @@
     });
 
     var count = allEmotions.length;
-    var layout = computeLayout(count);
-    var emoSize = layout.emoSize;
-    var radius = layout.radius;
-    var fontSize = layout.fontSize;
-    var size = (radius + emoSize / 2 + 4) * 2;
 
-    circle.style.width = size + 'px';
-    circle.style.height = size + 'px';
+    if (currentLayout === 'flower') {
+      var maxW = window.innerWidth - 40;
+      var maxH = window.innerHeight * 0.55;
+      var maxDim = Math.min(maxW, maxH);
+      var petalH = Math.min(Math.round(maxDim * 0.38), 110);
+      var petalW = Math.round(petalH * 0.55);
+      var petalOffset = Math.round(petalH * 0.35);
+      var size = (petalH + petalOffset) * 2 + 16;
+      var fontSize = Math.max(0.6, 0.8 * petalW / 60);
 
-    var cx = size / 2;
-    var cy = size / 2;
+      circle.style.width = size + 'px';
+      circle.style.height = size + 'px';
+      var cx = size / 2;
+      var cy = size / 2;
 
-    allEmotions.forEach(function(emo, i) {
-      var angle = (2 * Math.PI * i / count) - Math.PI / 2;
-      var x = cx + radius * Math.cos(angle);
-      var y = cy + radius * Math.sin(angle);
+      allEmotions.forEach(function(emo, i) {
+        var angle = (360 / count) * i;
+        var rad = (angle * Math.PI) / 180;
+        var x = cx + petalOffset * Math.sin(rad);
+        var y = cy - petalOffset * Math.cos(rad);
 
-      var el = document.createElement('div');
-      el.className = 'emo';
-      el.dataset.name = emo.name;
-      el.textContent = emo.name;
-      el.style.background = emo.bg;
-      el.style.color = emo.color;
-      el.style.fontSize = fontSize + 'rem';
-      el.style.setProperty('--emo-size', emoSize + 'px');
-      el.style.setProperty('--breathe-delay', (i * 0.5) + 's');
-      el.style.left = x + 'px';
-      el.style.top = y + 'px';
-      el.onclick = function() { selectEmo(el); };
-      circle.appendChild(el);
-    });
+        var el = document.createElement('div');
+        el.className = 'emo petal';
+        el.dataset.name = emo.name;
+        el.textContent = emo.name;
+        el.style.background = emo.bg;
+        el.style.color = emo.color;
+        el.style.fontSize = fontSize + 'rem';
+        el.style.setProperty('--petal-w', petalW + 'px');
+        el.style.setProperty('--petal-h', petalH + 'px');
+        el.style.setProperty('--petal-rot', angle + 'deg');
+        el.style.setProperty('--breathe-delay', (i * 0.5) + 's');
+        el.style.width = petalW + 'px';
+        el.style.height = petalH + 'px';
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.onclick = function() { selectEmo(el); };
+        circle.appendChild(el);
+      });
+    } else {
+      var layout = computeLayout(count);
+      var emoSize = layout.emoSize;
+      var radius = layout.radius;
+      var fontSize = layout.fontSize;
+      var size = (radius + emoSize / 2 + 4) * 2;
+
+      circle.style.width = size + 'px';
+      circle.style.height = size + 'px';
+      var cx = size / 2;
+      var cy = size / 2;
+
+      allEmotions.forEach(function(emo, i) {
+        var angle = (2 * Math.PI * i / count) - Math.PI / 2;
+        var x = cx + radius * Math.cos(angle);
+        var y = cy + radius * Math.sin(angle);
+
+        var el = document.createElement('div');
+        el.className = 'emo';
+        el.dataset.name = emo.name;
+        el.textContent = emo.name;
+        el.style.background = emo.bg;
+        el.style.color = emo.color;
+        el.style.fontSize = fontSize + 'rem';
+        el.style.setProperty('--emo-size', emoSize + 'px');
+        el.style.setProperty('--breathe-delay', (i * 0.5) + 's');
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.onclick = function() { selectEmo(el); };
+        circle.appendChild(el);
+      });
+    }
   }
 
   function today() {
@@ -537,6 +622,7 @@
   }
 
   renderWheel();
+  updateLayoutLabel();
 
   if (localStorage.getItem('panigosia_last_vote') === today()) {
     renderPie();
