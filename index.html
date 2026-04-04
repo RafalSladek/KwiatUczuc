@@ -633,6 +633,31 @@
 
     var cx = 150, cy = 150, r = 125;
     var ns = 'http://www.w3.org/2000/svg';
+
+    // Single emotion — full circle
+    if (sorted.length === 1) {
+      var name = sorted[0][0];
+      var c = colorMap[name] || { bg: 'rgba(200,200,200,0.3)', color: '#ccc' };
+      var pieBg = c.bg.replace(/,\s*[\d.]+\)$/, currentTheme === 'dark' ? ',0.55)' : ',0.7)');
+      var circle = document.createElementNS(ns, 'circle');
+      circle.setAttribute('cx', cx);
+      circle.setAttribute('cy', cy);
+      circle.setAttribute('r', r);
+      circle.setAttribute('fill', pieBg);
+      svg.appendChild(circle);
+      var text = document.createElementNS(ns, 'text');
+      text.setAttribute('x', cx);
+      text.setAttribute('y', cy);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'central');
+      text.setAttribute('font-size', '20');
+      text.setAttribute('font-weight', '600');
+      text.setAttribute('fill', currentTheme === 'dark' ? '#ffffff' : c.color);
+      text.textContent = name;
+      svg.appendChild(text);
+      return;
+    }
+
     var startAngle = -90;
 
     for (var i = 0; i < sorted.length; i++) {
