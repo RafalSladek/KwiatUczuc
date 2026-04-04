@@ -89,7 +89,7 @@
     margin: 0 auto;
   }
 
-  .emotion-circle { transition: width 0.6s ease, height 0.6s ease; }
+  .emotion-circle { transition: width 0.9s ease, height 0.9s ease; }
 
   .emo {
     position: absolute;
@@ -97,8 +97,8 @@
     display: flex; align-items: center; justify-content: center;
     text-align: center;
     cursor: pointer;
-    transition: left 0.6s ease, top 0.6s ease, width 0.6s ease, height 0.6s ease,
-                transform 0.6s ease, font-size 0.6s ease;
+    transition: left 0.9s ease, top 0.9s ease, width 0.9s ease, height 0.9s ease,
+                transform 0.9s ease, font-size 0.9s ease, opacity 0.5s ease;
     border: 2px solid transparent;
     font-weight: 500;
     user-select: none;
@@ -136,7 +136,7 @@
 
   .petal-text {
     display: block;
-    transition: transform 0.6s ease;
+    transition: transform 0.9s ease;
     transform: rotate(calc(-1 * var(--rot, 0deg)));
   }
 
@@ -576,7 +576,36 @@
     customEmotions.push(name);
     localStorage.setItem('panigosia_custom', JSON.stringify(customEmotions));
     hideModal();
-    renderWheel();
+
+    var ci = (customEmotions.length - 1) % customColors.length;
+    colorMap[name] = customColors[ci];
+    var emo = { name: name, bg: customColors[ci].bg, color: customColors[ci].color };
+    currentEmotions.push(emo);
+
+    var container = document.getElementById('emotionCircle');
+    var el = document.createElement('div');
+    el.className = 'emo';
+    el.dataset.name = emo.name;
+    var span = document.createElement('span');
+    span.className = 'petal-text';
+    span.textContent = emo.name;
+    el.appendChild(span);
+    el.style.background = emo.bg;
+    el.style.color = emo.color;
+    el.style.setProperty('--breathe-delay', (emoElements.length * 0.5) + 's');
+    el.style.opacity = '0';
+    el.style.left = (container.offsetWidth / 2) + 'px';
+    el.style.top = (container.offsetHeight / 2) + 'px';
+    el.style.width = '0px';
+    el.style.height = '0px';
+    el.onclick = function() { selectEmo(el); };
+    container.appendChild(el);
+    emoElements.push(el);
+
+    requestAnimationFrame(function() {
+      el.style.opacity = '1';
+      applyPositions();
+    });
   }
 
   function renderPie() {
