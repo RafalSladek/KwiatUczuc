@@ -71,7 +71,7 @@ async function takeScreenshots(deviceKey, outDir) {
 
   // Flower
   await page.evaluate(() => document.querySelector('#layoutToggle').click());
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1800);
   await shot('pastel-flower');
   count++;
 
@@ -94,7 +94,7 @@ async function takeScreenshots(deviceKey, outDir) {
     const btn = document.querySelector('#confirmBtn');
     if (btn) btn.click();
   });
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(1800);
   await shot('pastel-pie-today');
   count++;
 
@@ -103,7 +103,7 @@ async function takeScreenshots(deviceKey, outDir) {
     const btn = document.querySelector('[data-period="week"]');
     if (btn) btn.click();
   });
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1800);
   await shot('pastel-pie-week');
   count++;
 
@@ -112,7 +112,7 @@ async function takeScreenshots(deviceKey, outDir) {
     const btn = document.querySelector('[data-period="2weeks"]');
     if (btn) btn.click();
   });
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1800);
   await shot('pastel-pie-2weeks');
   count++;
 
@@ -121,7 +121,7 @@ async function takeScreenshots(deviceKey, outDir) {
     const btn = document.querySelector('[data-period="4weeks"]');
     if (btn) btn.click();
   });
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1800);
   await shot('pastel-pie-4weeks');
   count++;
 
@@ -142,7 +142,7 @@ async function takeScreenshots(deviceKey, outDir) {
 
   // Flower
   await page.evaluate(() => document.querySelector('#layoutToggle').click());
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1800);
   await shot('dark-flower');
   count++;
 
@@ -165,7 +165,7 @@ async function takeScreenshots(deviceKey, outDir) {
     const btn = document.querySelector('#confirmBtn');
     if (btn) btn.click();
   });
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(1800);
   await shot('dark-pie-today');
   count++;
 
@@ -174,7 +174,7 @@ async function takeScreenshots(deviceKey, outDir) {
     const btn = document.querySelector('[data-period="week"]');
     if (btn) btn.click();
   });
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1800);
   await shot('dark-pie-week');
   count++;
 
@@ -183,7 +183,7 @@ async function takeScreenshots(deviceKey, outDir) {
     const btn = document.querySelector('[data-period="4weeks"]');
     if (btn) btn.click();
   });
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1800);
   await shot('dark-pie-4weeks');
   count++;
 

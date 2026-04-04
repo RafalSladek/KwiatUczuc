@@ -779,92 +779,151 @@
       return;
     }
 
-    // Multi-segment spiral animation: segments appear one by one sweeping in
+    // Draw all segments immediately, text separately
     var startAngle = -90;
-    var segDelay = animate ? 120 : 0;
-    var segDur = animate ? 0.4 : 0;
+    var textEls = [];
 
     for (var i = 0; i < sorted.length; i++) {
-      (function(idx) {
-        var name = sorted[idx][0];
-        var count = sorted[idx][1];
-        var sweep = (count / total) * 360;
-        var endAngle = startAngle + sweep;
-        var c = colorMap[name] || { bg: 'rgba(200,200,200,0.3)', color: '#ccc' };
-        var pieBg = c.bg.replace(/,\s*[\d.]+\)$/, currentTheme === 'dark' ? ',0.55)' : ',0.7)');
-        var sA = startAngle;
+      var name = sorted[i][0];
+      var count = sorted[i][1];
+      var sweep = (count / total) * 360;
+      var endAngle = startAngle + sweep;
+      var c = colorMap[name] || { bg: 'rgba(200,200,200,0.3)', color: '#ccc' };
+      var pieBg = c.bg.replace(/,\s*[\d.]+\)$/, currentTheme === 'dark' ? ',0.55)' : ',0.7)');
 
-        function drawSegment() {
-          var startRad = (sA * Math.PI) / 180;
-          var endRad = (endAngle * Math.PI) / 180;
-          var x1 = cx + r * Math.cos(startRad);
-          var y1 = cy + r * Math.sin(startRad);
-          var x2 = cx + r * Math.cos(endRad);
-          var y2 = cy + r * Math.sin(endRad);
-          var largeArc = sweep > 180 ? 1 : 0;
+      var startRad = (startAngle * Math.PI) / 180;
+      var endRad = (endAngle * Math.PI) / 180;
+      var x1 = cx + r * Math.cos(startRad);
+      var y1 = cy + r * Math.sin(startRad);
+      var x2 = cx + r * Math.cos(endRad);
+      var y2 = cy + r * Math.sin(endRad);
+      var largeArc = sweep > 180 ? 1 : 0;
 
-          var path = document.createElementNS(ns, 'path');
-          path.setAttribute('d', 'M' + cx + ',' + cy + ' L' + x1 + ',' + y1 + ' A' + r + ',' + r + ' 0 ' + largeArc + ',1 ' + x2 + ',' + y2 + ' Z');
-          path.setAttribute('fill', pieBg);
-          if (animate) {
-            path.style.opacity = '0';
-            path.style.transition = 'opacity ' + segDur + 's ease';
+      var path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', 'M' + cx + ',' + cy + ' L' + x1 + ',' + y1 + ' A' + r + ',' + r + ' 0 ' + largeArc + ',1 ' + x2 + ',' + y2 + ' Z');
+      path.setAttribute('fill', pieBg);
+      svg.appendChild(path);
+
+      var line = document.createElementNS(ns, 'line');
+      line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+      line.setAttribute('x2', x1); line.setAttribute('y2', y1);
+      line.setAttribute('stroke', 'rgba(255,255,255,0.08)');
+      line.setAttribute('stroke-width', '0.5');
+      svg.appendChild(line);
+
+      // Radial text
+      var midDeg = startAngle + sweep / 2;
+      var midRad = (midDeg * Math.PI) / 180;
+      var lr = r * 0.6;
+      var lx = cx + lr * Math.cos(midRad);
+      var ly = cy + lr * Math.sin(midRad);
+      var normDeg = ((midDeg % 360) + 360) % 360;
+      var textDeg = normDeg;
+      if (normDeg > 90 && normDeg < 270) textDeg = normDeg + 180;
+
+      var text = document.createElementNS(ns, 'text');
+      text.setAttribute('x', lx); text.setAttribute('y', ly);
+      text.setAttribute('font-size', sweep > 30 ? '14' : '10');
+      text.setAttribute('font-weight', '600');
+      text.setAttribute('fill', currentTheme === 'dark' ? '#ffffff' : c.color);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'central');
+      text.setAttribute('transform', 'rotate(' + textDeg + ',' + lx + ',' + ly + ')');
+      text.textContent = name;
+      text.style.opacity = animate ? '0' : '1';
+      text.dataset.showAt = String(endAngle); // reveal when sweep passes this angle
+      svg.appendChild(text);
+      textEls.push(text);
+
+      startAngle = endAngle;
+    }
+
+    // Radar sweep animation: clip-path reveals pie clockwise from 12 o'clock
+    if (animate) {
+      var clipId = 'radarClip' + Date.now();
+      var defs = document.createElementNS(ns, 'defs');
+      var clipPath = document.createElementNS(ns, 'clipPath');
+      clipPath.setAttribute('id', clipId);
+      var sweepPath = document.createElementNS(ns, 'path');
+      clipPath.appendChild(sweepPath);
+      defs.appendChild(clipPath);
+      svg.insertBefore(defs, svg.firstChild);
+
+      // Wrap all pie content (except defs) in a group with clip-path
+      var g = document.createElementNS(ns, 'g');
+      g.setAttribute('clip-path', 'url(#' + clipId + ')');
+      var children = [];
+      for (var k = 0; k < svg.childNodes.length; k++) {
+        if (svg.childNodes[k] !== defs) children.push(svg.childNodes[k]);
+      }
+      for (var k = 0; k < children.length; k++) g.appendChild(children[k]);
+      svg.appendChild(g);
+
+      // Animate sweep from 0 to 360 degrees
+      var sweepDuration = 1200; // ms
+      var sweepStart = null;
+      var big = r + 10; // slightly larger than pie radius
+
+      function buildSweepPath(angleDeg) {
+        // Builds a pie-slice shape from -90deg sweeping angleDeg clockwise
+        if (angleDeg <= 0) return 'M0,0Z';
+        if (angleDeg >= 360) return 'M0,0 L' + (cx*3) + ',0 L' + (cx*3) + ',' + (cy*3) + ' L0,' + (cy*3) + 'Z';
+        var a = angleDeg;
+        var pts = [cx + ',' + cy, cx + ',' + (cy - big)];
+        // Add arc points at 90deg intervals that are within the sweep
+        var corners = [
+          [cx + big, cy - big],  // top-right at 0-90
+          [cx + big, cy + big],  // bottom-right at 90-180
+          [cx - big, cy + big],  // bottom-left at 180-270
+          [cx - big, cy - big],  // top-left at 270-360
+        ];
+        var thresholds = [90, 180, 270, 360];
+        for (var q = 0; q < 4; q++) {
+          if (a > thresholds[q]) {
+            pts.push(corners[q][0] + ',' + corners[q][1]);
           }
-          svg.appendChild(path);
+        }
+        // End point on the arc
+        var endRad = ((a - 90) * Math.PI) / 180;
+        var ex = cx + big * Math.cos(endRad);
+        var ey = cy + big * Math.sin(endRad);
+        pts.push(ex + ',' + ey);
+        return 'M' + pts.join(' L') + ' Z';
+      }
 
-          var line = document.createElementNS(ns, 'line');
-          line.setAttribute('x1', cx); line.setAttribute('y1', cy);
-          line.setAttribute('x2', x1); line.setAttribute('y2', y1);
-          line.setAttribute('stroke', 'rgba(255,255,255,0.08)');
-          line.setAttribute('stroke-width', '0.5');
-          if (animate) { line.style.opacity = '0'; line.style.transition = 'opacity ' + segDur + 's ease'; }
-          svg.appendChild(line);
+      function animateSweep(timestamp) {
+        if (!sweepStart) sweepStart = timestamp;
+        var elapsed = timestamp - sweepStart;
+        var progress = Math.min(elapsed / sweepDuration, 1);
+        // Ease out cubic for smooth deceleration
+        var eased = 1 - Math.pow(1 - progress, 3);
+        var currentAngle = eased * 360;
 
-          var midDeg = sA + sweep / 2;
-          var midRad = (midDeg * Math.PI) / 180;
-          var lr = r * 0.6;
-          var lx = cx + lr * Math.cos(midRad);
-          var ly = cy + lr * Math.sin(midRad);
+        sweepPath.setAttribute('d', buildSweepPath(currentAngle));
 
-          // Radial text orientation (like feelings wheel)
-          // Text runs along the radius; flip if pointing downward so it stays readable
-          var textDeg = midDeg;
-          if (textDeg > 90 && textDeg < 270) textDeg += 180;
-          if (textDeg < -90 && textDeg > -270) textDeg += 180;
-          // Normalize negative angles from startAngle=-90
-          var normDeg = ((midDeg % 360) + 360) % 360;
-          textDeg = normDeg;
-          if (normDeg > 90 && normDeg < 270) textDeg = normDeg + 180;
-
-          var text = document.createElementNS(ns, 'text');
-          text.setAttribute('x', lx); text.setAttribute('y', ly);
-          text.setAttribute('font-size', sweep > 30 ? '14' : '10');
-          text.setAttribute('font-weight', '600');
-          text.setAttribute('fill', currentTheme === 'dark' ? '#ffffff' : c.color);
-          text.setAttribute('text-anchor', 'middle');
-          text.setAttribute('dominant-baseline', 'central');
-          text.setAttribute('transform', 'rotate(' + textDeg + ',' + lx + ',' + ly + ')');
-          text.textContent = name;
-          if (animate) { text.style.opacity = '0'; text.style.transition = 'opacity 0.3s ease'; }
-          svg.appendChild(text);
-
-          if (animate) {
-            requestAnimationFrame(function() {
-              path.style.opacity = '1';
-              line.style.opacity = '1';
-              setTimeout(function() { text.style.opacity = '1'; }, segDur * 600);
-            });
+        // Reveal text labels when sweep passes their segment end
+        var currentSweepDeg = -90 + currentAngle;
+        for (var t = 0; t < textEls.length; t++) {
+          var showAt = parseFloat(textEls[t].dataset.showAt);
+          if (currentSweepDeg >= showAt && textEls[t].style.opacity === '0') {
+            textEls[t].style.transition = 'opacity 0.3s ease';
+            textEls[t].style.opacity = '1';
           }
         }
 
-        if (animate) {
-          setTimeout(drawSegment, idx * segDelay);
+        if (progress < 1) {
+          requestAnimationFrame(animateSweep);
         } else {
-          drawSegment();
+          // Remove clip-path after animation completes
+          g.removeAttribute('clip-path');
+          if (defs.parentNode) defs.parentNode.removeChild(defs);
+          // Move children back out of group
+          while (g.firstChild) svg.appendChild(g.firstChild);
+          if (g.parentNode) g.parentNode.removeChild(g);
         }
+      }
 
-        startAngle = endAngle;
-      })(i);
+      requestAnimationFrame(animateSweep);
     }
   }
 
