@@ -456,7 +456,7 @@
     } else {
       document.body.classList.remove('pastel');
     }
-    document.getElementById('themeToggle').textContent = currentTheme === 'dark' ? 'pastel' : 'ciemny';
+    document.getElementById('themeToggle').textContent = currentTheme === 'dark' ? 'jasny' : 'ciemny';
   }
 
   function toggleTheme() {
@@ -709,7 +709,7 @@
 
   // Feelings dictionary — Feelings Wheel (Dr. Gloria Willcox) + rozszerzenia
   var feelingsDict = [
-    // === RADOŚĆ (Happy) ===
+    // === UCZUCIA: RADOŚĆ (Happy) ===
     'szczęście','radość','euforia','zachwyt','entuzjazm','ekscytacja',
     'optymizm','nadzieja','wdzięczność','duma','pewność siebie',
     'spokój','harmonia','zadowolenie','satysfakcja','ulga',
@@ -718,7 +718,7 @@
     'energia','wigór','siła','odwaga','determinacja',
     'swoboda','wolność','lekkość','beztroskość',
     'humor','rozbawienie','wesołość',
-    // === SMUTEK (Sad) ===
+    // === UCZUCIA: SMUTEK (Sad) ===
     'smutek','żal','tęsknota','nostalgia','melancholia',
     'samotność','osamotnienie','izolacja','pustka',
     'rozczarowanie','zawód','rezygnacja','bezsilność',
@@ -726,49 +726,85 @@
     'przygnębienie','depresyjność','apatia','zniechęcenie',
     'bezradność','beznadziejność','rozpacz',
     'ból','cierpienie','żałoba','strata',
-    // === ZŁOŚĆ (Angry) ===
+    // === UCZUCIA: ZŁOŚĆ (Angry) ===
     'złość','gniew','wściekłość','furia','irytacja',
     'frustracja','zniecierpliwienie','rozdrażnienie',
     'uraza','niechęć','pogarda','odraza',
     'zazdrość','zawiść','rywalizacja',
     'bunt','sprzeciw','opór','upór',
     'agresja','wrogość','nienawiść',
-    // === STRACH (Fearful) ===
+    // === UCZUCIA: STRACH (Fearful) ===
     'strach','lęk','niepokój','obawa','trwoga',
     'panika','przerażenie','groza','horror',
     'nerwowość','napięcie','stres','presja',
     'niepewność','wahanie','zagubienie',
-    'bezpieczeństwo','zagrożenie','wrażliwość',
+    'zagrożenie','wrażliwość',
     'nieśmiałość','skrępowanie','tremor',
-    // === WSTRĘT (Disgusted) ===
+    // === UCZUCIA: WSTRĘT (Disgusted) ===
     'wstręt','obrzydzenie','niesmak','zniesmaczenie',
-    'rozczarowanie','dezaprobata','potępienie',
+    'dezaprobata','potępienie',
     'znudzenie','nuda','monotonia',
-    // === DYSKOMFORT (Bad) ===
+    // === UCZUCIA: DYSKOMFORT (Bad) ===
     'dyskomfort','zmęczenie','wyczerpanie','senność',
     'przytłoczenie','przeciążenie','wypalenie',
-    'napięcie','sztywność','dysharmonia',
+    'sztywność','dysharmonia',
     'zakłopotanie','zażenowanie','niezręczność',
     'niedowartościowanie','poczucie odrzucenia','alienacja',
-    'tępy ból','otępienie','odrętwienie',
-    // === ZASKOCZENIE (Surprised) ===
+    'otępienie','odrętwienie',
+    // === UCZUCIA: ZASKOCZENIE (Surprised) ===
     'zaskoczenie','zdumienie','szok','niedowierzanie',
-    'oszołomienie','konsternacja','zakłopotanie',
-    'podziw','zachwyt','olśnienie',
-    'ciekawość','intrygacja','tajemniczość',
-    // === POTRZEBY / dodatkowe stany ===
-    'spokój wewnętrzny','wewnętrzna siła','akceptacja',
-    'empatia','współczucie','troska','opiekuńczość',
-    'wdzięczność','uznanie','szacunek',
+    'oszołomienie','konsternacja',
+    'podziw','olśnienie',
+    'intrygacja','tajemniczość',
+    // === POTRZEBY FIZYCZNE (potrzebopedia.pl) ===
+    'higiena','dotyk','powietrze','pożywienie','woda','sen',
+    'bezpieczeństwo fizyczne','ochrona przed bólem',
+    'ekspresja seksualna','schronienie','ruch','zdrowie',
+    // === POTRZEBY DUCHOWE ===
+    'równość','jedność','dystans','głębia',
+    'symbioza','bezpieczeństwo','cisza','harmonia',
+    'kontakt z przyrodą','pokój','piękno','porządek',
+    'spokój','sens',
+    // === POTRZEBY RADOŚCI Z ŻYCIA ===
+    'relaks','wspólne doznania','wygoda',
+    'zabawa','przygoda','różnorodność','łatwość',
+    'prostota','rekreacja',
+    // === POTRZEBY SAMOREALIZACJI ===
+    'samorozwój','przewidywalność','rozwój',
+    'kontakt z własną wartością','cel','zaufanie do siebie',
+    'świętowanie','tożsamość','eksploracja',
+    'wyzwania','kreatywność','pewność',
+    'wnoszenie wartości','świadomość','spójność',
+    'sprawczość','wpływ','stymulacja',
+    'autentyczność','wewnętrzna równowaga','integralność',
+    'twórczość','skupienie','efektywność',
+    'osiągnięcia','samoakceptacja','wyrażanie siebie',
+    'jasność','kompetencje','uważność','uczenie się',
+    // === POTRZEBY SPOŁECZNE ===
+    'poszanowanie','akceptacja','miłość','otucha',
+    'zaufanie','intymność','ciepło','troska',
+    'więź','zgodność','towarzystwo','życzliwość',
+    'wsparcie','informacja zwrotna','wspólnota',
+    'uwaga','przyjęcie','szczerość',
+    'dzielenie się','uwzględnienie','kontakt',
+    'szacunek','pomoc','elastyczność','uznanie',
+    'struktura','przejrzystość','wzbogacenie życia',
+    'współzależność','współpraca','równowaga',
+    'wzajemność','bycie usłyszanym','empatia',
+    'zrozumienie','bycie widzianym',
+    'bezpieczeństwo emocjonalne',
+    // === POTRZEBY AUTONOMII ===
+    'spontaniczność','niezależność','przestrzeń',
+    'odrębność','stabilność','swoboda','wolność wyboru',
+    // === DODATKOWE STANY ===
+    'spokój wewnętrzny','wewnętrzna siła',
+    'współczucie','opiekuńczość',
     'motywacja','zapał','pasja','flow',
-    'komfort','bezpieczeństwo','stabilność',
-    'kreatywność','twórczość','wyobraźnia',
-    'skupienie','uważność','obecność','mindfulness',
-    'wolność','niezależność','autonomia',
-    'przynależność','więź','wspólnota','lojalność',
-    'autentyczność','spójność','integralność',
-    'poczucie sensu','cel','misja',
-    'równowaga','centrowanie','grounding'
+    'komfort','wyobraźnia',
+    'obecność','mindfulness',
+    'autonomia','przynależność','lojalność',
+    'poczucie sensu','misja',
+    'centrowanie','grounding'
   ];
   // Deduplicate
   feelingsDict = feelingsDict.filter(function(v, i, a) { return a.indexOf(v) === i; });
