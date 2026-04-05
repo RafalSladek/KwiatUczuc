@@ -1,4 +1,4 @@
-var CACHE = 'kontakt-v1';
+var CACHE = 'kontakt-v2';
 var ASSETS = [
   '/',
   '/index.html',

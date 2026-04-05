@@ -267,6 +267,22 @@
   .modal-cancel { background: rgba(149,117,205,0.12); color: #b39ddb; }
   .modal-save { background: linear-gradient(135deg, rgba(239,83,80,0.6), rgba(186,104,200,0.6)); color: #fff; }
 
+  .modal p { font-size: 0.85rem; color: #b0a0c8; margin-bottom: 16px; line-height: 1.5; }
+  .modal input[type="time"] {
+    width: 100%;
+    background: rgba(149,117,205,0.1);
+    border: 1px solid rgba(149,117,205,0.2);
+    border-radius: 16px;
+    padding: 14px 16px; color: #e0e0f0; font-size: 1.2rem;
+    outline: none; font-family: inherit; margin-bottom: 16px;
+    text-align: center;
+  }
+  .modal input[type="time"]:focus { border-color: rgba(186,104,200,0.5); }
+  body.pastel .modal p { color: #7a6a90; }
+  body.pastel .modal input[type="time"] {
+    background: rgba(195,177,225,0.12); border-color: rgba(195,177,225,0.3); color: #3d3d5c;
+  }
+
   .autocomplete-list {
     list-style: none; margin: 0 0 12px; padding: 0;
     max-height: 150px; overflow-y: auto; border-radius: 12px;
@@ -396,6 +412,18 @@
       <div class="modal-actions">
         <button class="modal-cancel" onclick="hideModal()">Anuluj</button>
         <button class="modal-save" onclick="addCustom()">Dodaj</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="reminderModal">
+    <div class="modal">
+      <h3>Wieczorny rytuał</h3>
+      <p>O której chcesz się zatrzymać i sprawdzić jak się czujesz?</p>
+      <input type="time" id="reminderTime" value="20:00">
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="skipReminder()">Pomiń</button>
+        <button class="modal-save" onclick="saveReminder()">Przypomnij mi</button>
       </div>
     </div>
   </div>
@@ -1152,6 +1180,55 @@
       });
       document.getElementById('confirmBtn').classList.remove('hidden');
     }
+  }
+
+  // --- Reminder notification ---
+  function skipReminder() {
+    localStorage.setItem('kontakt_reminder', 'skipped');
+    document.getElementById('reminderModal').classList.remove('active');
+  }
+
+  function saveReminder() {
+    var time = document.getElementById('reminderTime').value || '20:00';
+    if (!('Notification' in window)) {
+      localStorage.setItem('kontakt_reminder', time);
+      document.getElementById('reminderModal').classList.remove('active');
+      return;
+    }
+    Notification.requestPermission().then(function(perm) {
+      if (perm === 'granted') {
+        localStorage.setItem('kontakt_reminder', time);
+      } else {
+        localStorage.setItem('kontakt_reminder', 'denied');
+      }
+      document.getElementById('reminderModal').classList.remove('active');
+    });
+  }
+
+  function scheduleReminder() {
+    var time = localStorage.getItem('kontakt_reminder');
+    if (!time || time === 'skipped' || time === 'denied') return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    var parts = time.split(':');
+    var h = parseInt(parts[0], 10);
+    var m = parseInt(parts[1], 10);
+    var now = new Date();
+    var target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+    if (target <= now) return; // already past today
+    var delay = target - now;
+    setTimeout(function() {
+      new Notification('kONtakt', {
+        body: 'Czas na wieczorny rytuał — jak się dziś czujesz?',
+        icon: 'icons/icon-192.png'
+      });
+    }, delay);
+  }
+
+  // Show reminder modal on first visit
+  if (!localStorage.getItem('kontakt_reminder')) {
+    document.getElementById('reminderModal').classList.add('active');
+  } else {
+    scheduleReminder();
   }
 
   if ('serviceWorker' in navigator) {

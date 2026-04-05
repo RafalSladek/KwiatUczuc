@@ -55,6 +55,7 @@ async function takeScreenshots(deviceKey, outDir) {
     localStorage.setItem('kontakt_entries', JSON.stringify(entries));
     localStorage.removeItem('kontakt_last_vote');
     localStorage.removeItem('kontakt_theme');
+    localStorage.setItem('kontakt_reminder', 'skipped');
   }, SEED_ENTRIES);
 
   await page.goto(url);
