@@ -935,10 +935,18 @@
 
   function getFilteredEntries() {
     var now = new Date();
+    var todayStr = now.toISOString().split('T')[0];
+    if (currentPeriod === 'today') {
+      return entries.filter(function(e) { return e.date === todayStr; });
+    }
+    if (currentPeriod === 'yesterday') {
+      var y = new Date(now); y.setDate(now.getDate() - 1);
+      var yStr = y.toISOString().split('T')[0];
+      return entries.filter(function(e) { return e.date === yStr; });
+    }
+    // Range periods: sum last N days
     var cutoff = new Date(now);
-    if (currentPeriod === 'today') cutoff.setHours(0, 0, 0, 0);
-    else if (currentPeriod === 'yesterday') { cutoff.setDate(now.getDate() - 1); cutoff.setHours(0, 0, 0, 0); }
-    else if (currentPeriod === 'week') cutoff.setDate(now.getDate() - 7);
+    if (currentPeriod === 'week') cutoff.setDate(now.getDate() - 7);
     else if (currentPeriod === '2weeks') cutoff.setDate(now.getDate() - 14);
     else if (currentPeriod === '4weeks') cutoff.setDate(now.getDate() - 28);
     var cutoffStr = cutoff.toISOString().split('T')[0];
