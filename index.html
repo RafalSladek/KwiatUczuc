@@ -374,6 +374,7 @@
     </div>
     <div class="period-selector" id="periodSelector">
       <button class="period-btn active" data-period="today" onclick="setPeriod('today')">dziś</button>
+      <button class="period-btn" data-period="yesterday" onclick="setPeriod('yesterday')">wczoraj</button>
       <button class="period-btn" data-period="week" onclick="setPeriod('week')">tydzień</button>
       <button class="period-btn" data-period="2weeks" onclick="setPeriod('2weeks')">2 tyg</button>
       <button class="period-btn" data-period="4weeks" onclick="setPeriod('4weeks')">4 tyg</button>
@@ -936,6 +937,7 @@
     var now = new Date();
     var cutoff = new Date(now);
     if (currentPeriod === 'today') cutoff.setHours(0, 0, 0, 0);
+    else if (currentPeriod === 'yesterday') { cutoff.setDate(now.getDate() - 1); cutoff.setHours(0, 0, 0, 0); }
     else if (currentPeriod === 'week') cutoff.setDate(now.getDate() - 7);
     else if (currentPeriod === '2weeks') cutoff.setDate(now.getDate() - 14);
     else if (currentPeriod === '4weeks') cutoff.setDate(now.getDate() - 28);
