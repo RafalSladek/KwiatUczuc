@@ -65,9 +65,9 @@ const SEED_ENTRIES = [
 
   // Seed entries (no today entry — user will select in the flow)
   await page.addInitScript((entries) => {
-    localStorage.setItem('panigosia_entries', JSON.stringify(entries));
-    localStorage.removeItem('panigosia_last_vote');
-    localStorage.removeItem('panigosia_theme');
+    localStorage.setItem('kontakt_entries', JSON.stringify(entries));
+    localStorage.removeItem('kontakt_last_vote');
+    localStorage.removeItem('kontakt_theme');
   }, SEED_ENTRIES);
 
   await page.goto(url);

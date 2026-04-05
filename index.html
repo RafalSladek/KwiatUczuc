@@ -399,8 +399,8 @@
 </div> <!-- /app -->
 
 <script>
-  var customEmotions = JSON.parse(localStorage.getItem('panigosia_custom') || '[]');
-  var entries = JSON.parse(localStorage.getItem('panigosia_entries') || '[]');
+  var customEmotions = JSON.parse(localStorage.getItem('kontakt_custom') || '[]');
+  var entries = JSON.parse(localStorage.getItem('kontakt_entries') || '[]');
 
   /* Colors based on original Feelings Wheel (Dr. Gloria Willcox)
      Happy=#F0D860  Sad=#6B9DC8  Disgusted=#7AB48C  Angry=#E88878
@@ -441,7 +441,7 @@
     ]
   };
 
-  var currentTheme = localStorage.getItem('panigosia_theme') || 'pastel';
+  var currentTheme = localStorage.getItem('kontakt_theme') || 'pastel';
   var baseEmotions = darkColors.emotions;
   var customColors = darkColors.custom;
   var colorMap = {};
@@ -462,14 +462,14 @@
 
   function toggleTheme() {
     currentTheme = currentTheme === 'dark' ? 'pastel' : 'dark';
-    localStorage.setItem('panigosia_theme', currentTheme);
+    localStorage.setItem('kontakt_theme', currentTheme);
     applyTheme();
     renderWheel();
   }
 
   applyTheme();
 
-  var currentLayout = localStorage.getItem('panigosia_layout') || 'circle';
+  var currentLayout = localStorage.getItem('kontakt_layout') || 'circle';
   var emoElements = [];
   var currentEmotions = [];
 
@@ -500,7 +500,7 @@
 
   function toggleLayout() {
     currentLayout = currentLayout === 'circle' ? 'flower' : 'circle';
-    localStorage.setItem('panigosia_layout', currentLayout);
+    localStorage.setItem('kontakt_layout', currentLayout);
     updateToggleIcon();
     applyPositions();
   }
@@ -656,8 +656,8 @@
       }
     }
     if (!found) entries.push({ date: t, emotions: selectedNames.slice() });
-    localStorage.setItem('panigosia_entries', JSON.stringify(entries));
-    localStorage.setItem('panigosia_last_vote', t);
+    localStorage.setItem('kontakt_entries', JSON.stringify(entries));
+    localStorage.setItem('kontakt_last_vote', t);
     currentPeriod = 'today';
     updatePeriodButtons();
     renderPie(true);
@@ -899,7 +899,7 @@
     var name = input.value.trim().toLowerCase();
     if (!name || colorMap[name] || customEmotions.indexOf(name) !== -1) { hideModal(); return; }
     customEmotions.push(name);
-    localStorage.setItem('panigosia_custom', JSON.stringify(customEmotions));
+    localStorage.setItem('kontakt_custom', JSON.stringify(customEmotions));
     hideModal();
 
     var ci = (customEmotions.length - 1) % customColors.length;
@@ -1134,7 +1134,7 @@
   renderWheel();
 
   // Restore today's emotions on the wheel if already voted today
-  if (localStorage.getItem('panigosia_last_vote') === today()) {
+  if (localStorage.getItem('kontakt_last_vote') === today()) {
     var todayEntry = null;
     for (var i = 0; i < entries.length; i++) {
       if (entries[i].date === today()) { todayEntry = entries[i]; break; }

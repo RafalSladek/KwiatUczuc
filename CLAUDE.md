@@ -32,10 +32,10 @@ Single-file app — all HTML, CSS, and JS live in `index.html`:
 
 All user data is stored **client-side only**:
 
-- `panigosia_entries` — JSON array of `{date, emotions[]}` entries
-- `panigosia_custom` — JSON array of custom emotion names
-- `panigosia_theme` — `"pastel"` (default) or `"dark"`
-- `panigosia_last_vote` — date string of last vote (shows pie chart on revisit)
+- `kontakt_entries` — JSON array of `{date, emotions[]}` entries
+- `kontakt_custom` — JSON array of custom emotion names
+- `kontakt_theme` — `"pastel"` (default) or `"dark"`
+- `kontakt_last_vote` — date string of last vote (shows pie chart on revisit)
 - No backend, no sync, no accounts
 
 ## Key Implementation Details

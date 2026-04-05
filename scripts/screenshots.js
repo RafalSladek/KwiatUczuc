@@ -52,9 +52,9 @@ async function takeScreenshots(deviceKey, outDir) {
 
   // Seed entries
   await page.addInitScript((entries) => {
-    localStorage.setItem('panigosia_entries', JSON.stringify(entries));
-    localStorage.removeItem('panigosia_last_vote');
-    localStorage.removeItem('panigosia_theme');
+    localStorage.setItem('kontakt_entries', JSON.stringify(entries));
+    localStorage.removeItem('kontakt_last_vote');
+    localStorage.removeItem('kontakt_theme');
   }, SEED_ENTRIES);
 
   await page.goto(url);
