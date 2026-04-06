@@ -1,19 +1,19 @@
-# kONtakt
+# Kwiat Uczuć
 
-**Wlacz sie na siebie**
+**Włącz się na siebie**
 
-Emocje, potrzeby, wewnetrzne spelnienie (dobrostan psychiczny).
+Emocje, potrzeby, wewnętrzne spełnienie (dobrostan psychiczny).
 
 ## Opis
 
-kONtakt pomaga rodzicom i dzieciom w codziennym rozpoznawaniu i nazywaniu swoich stanow emocjonalnych. Wieczorny rytual polega na wybraniu emocji z kola emocji opartego na Feelings Wheel (Dr. Gloria Willcox). Aplikacja oferuje 7 podstawowych emocji z mozliwoscia dodawania wlasnych stanow.
+Kwiat Uczuć pomaga rodzicom i dzieciom w codziennym rozpoznawaniu i nazywaniu swoich stanów emocjonalnych. Wieczorny rytuał polega na wybraniu emocji z koła emocji opartego na Feelings Wheel (Dr. Gloria Willcox). Aplikacja oferuje 7 podstawowych emocji z możliwością dodawania własnych stanów.
 
 ## Funkcje
 
-- Kolo emocji z 7 podstawowymi stanami (radosc, smutek, wstret, zlosc, strach, dyskomfort, zaskoczenie)
-- Animowany przelacznik kolo/kwiat emocji
-- Mozliwosc dodawania wlasnych stanow emocjonalnych
-- 2 palety kolorow: ciemna i pastelowa
+- Koło emocji z 7 podstawowymi stanami (radość, smutek, wstręt, złość, strach, dyskomfort, zaskoczenie)
+- Animowany przełącznik koło/kwiat emocji
+- Możliwość dodawania własnych stanów emocjonalnych
+- 2 palety kolorów: ciemna i jasna
 - Responsywny layout — telefon, tablet, desktop
 - Dane zapisywane lokalnie (brak backendu)
 
@@ -25,38 +25,42 @@ kONtakt pomaga rodzicom i dzieciom w codziennym rozpoznawaniu i nazywaniu swoich
 
 ### iPhone SE
 
-| Widok | Pastelowy | Ciemny |
-|-------|-----------|--------|
-| Kolo emocji | ![Pastel circle](docs/screenshots/iphonese-pastel-circle.png) | ![Dark circle](docs/screenshots/iphonese-dark-circle.png) |
+| Widok | Jasny | Ciemny |
+|-------|-------|--------|
+| Koło emocji | ![Pastel circle](docs/screenshots/iphonese-pastel-circle.png) | ![Dark circle](docs/screenshots/iphonese-dark-circle.png) |
 | Kwiat emocji | ![Pastel flower](docs/screenshots/iphonese-pastel-flower.png) | ![Dark flower](docs/screenshots/iphonese-dark-flower.png) |
 | Wykres | ![Pastel pie](docs/screenshots/iphonese-pastel-pie.png) | ![Dark pie](docs/screenshots/iphonese-dark-pie.png) |
 
 ### Desktop
 
-| Pastelowy | Ciemny |
-|-----------|--------|
+| Jasny | Ciemny |
+|-------|--------|
 | ![Desktop pastel](docs/screenshots/desktop-pastel-circle.png) | ![Desktop dark](docs/screenshots/desktop-dark-circle.png) |
 | ![Desktop pastel flower](docs/screenshots/desktop-pastel-flower.png) | ![Desktop dark flower](docs/screenshots/desktop-dark-flower.png) |
 
 ## Live
 
-**https://kontakt.rafal-sladek.com/**
+**https://kwiatuczuc.pl/**
 
 Mirror: https://rafalsladek.github.io/kONtakt/
 
-Kazdy push na `main` automatycznie deployuje nowa wersje via GitHub Pages.
+Każdy push na `main` automatycznie deployuje nową wersję via GitHub Pages.
 
 ## Technologia
 
 - Single-file HTML/CSS/JS — brak build stepu
-- PWA offline-first (planowane)
+- PWA offline-first (service worker + manifest)
 - Dane lokalne (localStorage)
 - Brak backendu
 
 ## Uruchomienie
 
-Otworz `index.html` w przegladarce. Nie wymaga serwera ani build stepu.
+Otwórz `index.html` w przeglądarce. Nie wymaga serwera ani build stepu.
 
 ## Spec
 
-Szczegolowy design: [docs/superpowers/specs/2026-04-04-pani-gosia-design.md](docs/superpowers/specs/2026-04-04-pani-gosia-design.md)
+Szczegółowy design: [docs/superpowers/specs/2026-04-04-pani-gosia-design.md](docs/superpowers/specs/2026-04-04-pani-gosia-design.md)
+
+## Strategia
+
+Strategia produktu i marketingu: [docs/kwiat-uczuc-strategia-v2.md](docs/kwiat-uczuc-strategia-v2.md)

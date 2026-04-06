@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Take screenshots of kONtakt app in all variants.
+ * Take screenshots of Kwiat Uczuć app in all variants.
  * Usage: node scripts/screenshots.js [--device <name>] [--out <dir>]
  *
  * Devices: iphonese, iphone14, pixel5, desktop
@@ -52,10 +52,10 @@ async function takeScreenshots(deviceKey, outDir) {
 
   // Seed entries
   await page.addInitScript((entries) => {
-    localStorage.setItem('kontakt_entries', JSON.stringify(entries));
-    localStorage.removeItem('kontakt_last_vote');
-    localStorage.removeItem('kontakt_theme');
-    localStorage.setItem('kontakt_reminder', 'skipped');
+    localStorage.setItem('kwiatuczuc_entries', JSON.stringify(entries));
+    localStorage.removeItem('kwiatuczuc_last_vote');
+    localStorage.removeItem('kwiatuczuc_theme');
+    localStorage.setItem('kwiatuczuc_reminder', 'skipped');
   }, SEED_ENTRIES);
 
   await page.goto(url);

@@ -1,4 +1,4 @@
-var CACHE = 'kontakt-v2';
+var CACHE = 'kwiatuczuc-v1';
 var ASSETS = [
   '/',
   '/index.html',

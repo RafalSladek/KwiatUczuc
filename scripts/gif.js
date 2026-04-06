@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generate user-journey GIF for kONtakt app.
+ * Generate user-journey GIF for Kwiat Uczuć app.
  * Usage: node scripts/gif.js [--device <name>] [--out <path>] [--fps <n>]
  *
  * Requires: ffmpeg
@@ -52,7 +52,7 @@ const SEED_ENTRIES = [
   const dev = DEVICES[deviceKey];
   if (!dev) { console.error(`Unknown device: ${deviceKey}`); process.exit(1); }
 
-  const tmpDir = path.join(require('os').tmpdir(), 'kontakt-gif-frames');
+  const tmpDir = path.join(require('os').tmpdir(), 'kwiatuczuc-gif-frames');
   if (fs.existsSync(tmpDir)) fs.rmSync(tmpDir, { recursive: true });
   fs.mkdirSync(tmpDir);
 
@@ -65,10 +65,10 @@ const SEED_ENTRIES = [
 
   // Seed entries (no today entry — user will select in the flow)
   await page.addInitScript((entries) => {
-    localStorage.setItem('kontakt_entries', JSON.stringify(entries));
-    localStorage.removeItem('kontakt_last_vote');
-    localStorage.removeItem('kontakt_theme');
-    localStorage.setItem('kontakt_reminder', 'skipped');
+    localStorage.setItem('kwiatuczuc_entries', JSON.stringify(entries));
+    localStorage.removeItem('kwiatuczuc_last_vote');
+    localStorage.removeItem('kwiatuczuc_theme');
+    localStorage.setItem('kwiatuczuc_reminder', 'skipped');
   }, SEED_ENTRIES);
 
   await page.goto(url);

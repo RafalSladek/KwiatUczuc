@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>kONtakt — Włącz się na siebie</title>
-<meta property="og:title" content="kONtakt — Włącz się na siebie">
+<title>Kwiat Uczuć — Włącz się na siebie</title>
+<meta property="og:title" content="Kwiat Uczuć — Włącz się na siebie">
 <meta property="og:description" content="Emocje, potrzeby, wewnętrzne spełnienie. Wieczorny rytuał emocjonalny dla każdego.">
-<meta property="og:image" content="https://kontakt.rafal-sladek.com/icons/icon-512.png">
-<meta property="og:url" content="https://kontakt.rafal-sladek.com/">
+<meta property="og:image" content="https://kwiatuczuc.pl/icons/icon-512.png">
+<meta property="og:url" content="https://kwiatuczuc.pl/">
 <meta property="og:type" content="website">
-<meta name="description" content="kONtakt — wieczorny rytuał emocjonalny dla każdego. Rozpoznawaj i nazywaj swoje stany emocjonalne.">
+<meta name="description" content="Kwiat Uczuć — wieczorny rytuał emocjonalny dla każdego. Rozpoznawaj i nazywaj swoje stany emocjonalne.">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
@@ -378,7 +378,7 @@
 
   <div class="screen" id="screen1">
     <div class="app-header">
-      <div class="app-title">kONtakt</div>
+      <div class="app-title">Kwiat Uczuć</div>
       <div class="app-subtitle">Włącz się na siebie</div>
     </div>
     <p class="screen-question">Jak się dziś czujesz?</p>
@@ -389,7 +389,7 @@
 
   <div class="screen hidden" id="screen2">
     <div class="app-header">
-      <div class="app-title">kONtakt</div>
+      <div class="app-title">Kwiat Uczuć</div>
       <div class="app-subtitle">Włącz się na siebie</div>
     </div>
     <div class="period-selector" id="periodSelector">
@@ -431,8 +431,20 @@
 </div> <!-- /app -->
 
 <script>
-  var customEmotions = JSON.parse(localStorage.getItem('kontakt_custom') || '[]');
-  var entries = JSON.parse(localStorage.getItem('kontakt_entries') || '[]');
+  // Migrate localStorage from old prefix (kontakt_) to new (kwiatuczuc_)
+  (function() {
+    var keys = ['entries','custom','theme','last_vote','layout','reminder'];
+    for (var i = 0; i < keys.length; i++) {
+      var old = localStorage.getItem('kontakt_' + keys[i]);
+      if (old !== null && localStorage.getItem('kwiatuczuc_' + keys[i]) === null) {
+        localStorage.setItem('kwiatuczuc_' + keys[i], old);
+        localStorage.removeItem('kontakt_' + keys[i]);
+      }
+    }
+  })();
+
+  var customEmotions = JSON.parse(localStorage.getItem('kwiatuczuc_custom') || '[]');
+  var entries = JSON.parse(localStorage.getItem('kwiatuczuc_entries') || '[]');
 
   /* Colors based on original Feelings Wheel (Dr. Gloria Willcox)
      Happy=#F0D860  Sad=#6B9DC8  Disgusted=#7AB48C  Angry=#E88878
@@ -473,7 +485,7 @@
     ]
   };
 
-  var currentTheme = localStorage.getItem('kontakt_theme') || 'pastel';
+  var currentTheme = localStorage.getItem('kwiatuczuc_theme') || 'pastel';
   var baseEmotions = darkColors.emotions;
   var customColors = darkColors.custom;
   var colorMap = {};
@@ -494,14 +506,14 @@
 
   function toggleTheme() {
     currentTheme = currentTheme === 'dark' ? 'pastel' : 'dark';
-    localStorage.setItem('kontakt_theme', currentTheme);
+    localStorage.setItem('kwiatuczuc_theme', currentTheme);
     applyTheme();
     renderWheel();
   }
 
   applyTheme();
 
-  var currentLayout = localStorage.getItem('kontakt_layout') || 'circle';
+  var currentLayout = localStorage.getItem('kwiatuczuc_layout') || 'circle';
   var emoElements = [];
   var currentEmotions = [];
 
@@ -532,7 +544,7 @@
 
   function toggleLayout() {
     currentLayout = currentLayout === 'circle' ? 'flower' : 'circle';
-    localStorage.setItem('kontakt_layout', currentLayout);
+    localStorage.setItem('kwiatuczuc_layout', currentLayout);
     updateToggleIcon();
     applyPositions();
   }
@@ -688,8 +700,8 @@
       }
     }
     if (!found) entries.push({ date: t, emotions: selectedNames.slice() });
-    localStorage.setItem('kontakt_entries', JSON.stringify(entries));
-    localStorage.setItem('kontakt_last_vote', t);
+    localStorage.setItem('kwiatuczuc_entries', JSON.stringify(entries));
+    localStorage.setItem('kwiatuczuc_last_vote', t);
     currentPeriod = 'today';
     updatePeriodButtons();
     renderPie(true);
@@ -931,7 +943,7 @@
     var name = input.value.trim().toLowerCase();
     if (!name || colorMap[name] || customEmotions.indexOf(name) !== -1) { hideModal(); return; }
     customEmotions.push(name);
-    localStorage.setItem('kontakt_custom', JSON.stringify(customEmotions));
+    localStorage.setItem('kwiatuczuc_custom', JSON.stringify(customEmotions));
     hideModal();
 
     var ci = (customEmotions.length - 1) % customColors.length;
@@ -1166,7 +1178,7 @@
   renderWheel();
 
   // Restore today's emotions on the wheel if already voted today
-  if (localStorage.getItem('kontakt_last_vote') === today()) {
+  if (localStorage.getItem('kwiatuczuc_last_vote') === today()) {
     var todayEntry = null;
     for (var i = 0; i < entries.length; i++) {
       if (entries[i].date === today()) { todayEntry = entries[i]; break; }
@@ -1184,29 +1196,29 @@
 
   // --- Reminder notification ---
   function skipReminder() {
-    localStorage.setItem('kontakt_reminder', 'skipped');
+    localStorage.setItem('kwiatuczuc_reminder', 'skipped');
     document.getElementById('reminderModal').classList.remove('active');
   }
 
   function saveReminder() {
     var time = document.getElementById('reminderTime').value || '20:00';
     if (!('Notification' in window)) {
-      localStorage.setItem('kontakt_reminder', time);
+      localStorage.setItem('kwiatuczuc_reminder', time);
       document.getElementById('reminderModal').classList.remove('active');
       return;
     }
     Notification.requestPermission().then(function(perm) {
       if (perm === 'granted') {
-        localStorage.setItem('kontakt_reminder', time);
+        localStorage.setItem('kwiatuczuc_reminder', time);
       } else {
-        localStorage.setItem('kontakt_reminder', 'denied');
+        localStorage.setItem('kwiatuczuc_reminder', 'denied');
       }
       document.getElementById('reminderModal').classList.remove('active');
     });
   }
 
   function scheduleReminder() {
-    var time = localStorage.getItem('kontakt_reminder');
+    var time = localStorage.getItem('kwiatuczuc_reminder');
     if (!time || time === 'skipped' || time === 'denied') return;
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
     var parts = time.split(':');
@@ -1217,7 +1229,7 @@
     if (target <= now) return; // already past today
     var delay = target - now;
     setTimeout(function() {
-      new Notification('kONtakt', {
+      new Notification('Kwiat Uczuć', {
         body: 'Czas na wieczorny rytuał — jak się dziś czujesz?',
         icon: 'icons/icon-192.png'
       });
@@ -1225,7 +1237,7 @@
   }
 
   // Show reminder modal on first visit
-  if (!localStorage.getItem('kontakt_reminder')) {
+  if (!localStorage.getItem('kwiatuczuc_reminder')) {
     document.getElementById('reminderModal').classList.add('active');
   } else {
     scheduleReminder();

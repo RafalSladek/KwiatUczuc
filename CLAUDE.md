@@ -1,13 +1,13 @@
-# kONtakt — Claude Instructions
+# Kwiat Uczuć — Claude Instructions
 
 ## Project Overview
 
-**kONtakt** is an evening emotional ritual PWA for families. Single-page app, single HTML file, no build step.
+**Kwiat Uczuć** is an evening emotional ritual PWA for families. Single-page app, single HTML file, no build step.
 
-**Live app:** https://kontakt.rafal-sladek.com/ (mirror: https://rafalsladek.github.io/kONtakt/)
+**Live app:** https://kwiatuczuc.pl/ (mirror: https://rafalsladek.github.io/kONtakt/)
 **Repo:** https://github.com/RafalSladek/kONtakt
 **Deployed via:** GitHub Pages from `main` branch, root `/`
-**Custom domain:** `kontakt.rafal-sladek.com` via Cloudflare DNS → CNAME file in repo
+**Custom domain:** `kwiatuczuc.pl` via Cloudflare DNS → CNAME file in repo
 
 ## Architecture
 
@@ -32,11 +32,14 @@ Single-file app — all HTML, CSS, and JS live in `index.html`:
 
 All user data is stored **client-side only**:
 
-- `kontakt_entries` — JSON array of `{date, emotions[]}` entries
-- `kontakt_custom` — JSON array of custom emotion names
-- `kontakt_theme` — `"pastel"` (default) or `"dark"`
-- `kontakt_last_vote` — date string of last vote (shows pie chart on revisit)
+- `kwiatuczuc_entries` — JSON array of `{date, emotions[]}` entries
+- `kwiatuczuc_custom` — JSON array of custom emotion names
+- `kwiatuczuc_theme` — `"pastel"` (default) or `"dark"`
+- `kwiatuczuc_last_vote` — date string of last vote (shows pie chart on revisit)
+- `kwiatuczuc_layout` — `"circle"` (default) or `"flower"`
+- `kwiatuczuc_reminder` — reminder time (HH:MM), `"skipped"`, or `"denied"`
 - No backend, no sync, no accounts
+- Migration from old `kontakt_` prefix runs automatically on load
 
 ## Key Implementation Details
 
